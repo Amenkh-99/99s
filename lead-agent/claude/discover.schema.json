@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["candidates", "sources_used", "notes"],
+  "properties": {
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["company_name", "website", "city", "state", "discovery_source", "discovery_evidence_url", "why_candidate"],
+        "properties": {
+          "company_name": { "type": "string" },
+          "website": { "type": "string", "description": "Official website URL, or empty string if not found" },
+          "city": { "type": "string" },
+          "state": { "type": "string", "description": "Two-letter US state code, or empty string" },
+          "discovery_source": { "type": "string", "enum": ["apollo_free_search", "web_search", "directory"] },
+          "discovery_evidence_url": { "type": "string", "description": "URL of the page where this company was found, or empty string for Apollo results" },
+          "why_candidate": { "type": "string" }
+        }
+      }
+    },
+    "sources_used": { "type": "array", "items": { "type": "string" } },
+    "notes": { "type": "string" }
+  }
+}

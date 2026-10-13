@@ -1,0 +1,6 @@
+# Local working data: leads, logs, research results, generated workflow. Never committed.
+data/
+archive/
+# Your private lists (created from the *.example.csv templates by setup.ps1)
+config/do_not_contact.csv
+config/lead_updates.csv

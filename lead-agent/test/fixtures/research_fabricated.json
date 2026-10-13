@@ -1,0 +1,41 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 1,
+  "result": "",
+  "structured_output": {
+    "companies": [
+      {
+        "company_name": "Accurate Staffing, Inc.",
+        "website": "https://www.accuratestaffing.com/contact-us/",
+        "state": "NC",
+        "is_target_industry": true,
+        "discovery_source": "test_fixture",
+        "facts": [],
+        "not_found": [],
+        "hypotheses": { "automation_opportunity": "", "outreach_angle": "" },
+        "research_notes": "TEST: skipped as a duplicate when accuratestaffing.com is already in the database; otherwise stored as a bare test lead."
+      },
+      {
+        "company_name": "Example Domain Staffing LLC",
+        "website": "https://example.com",
+        "state": "TX",
+        "is_target_industry": true,
+        "discovery_source": "test_fixture",
+        "facts": [
+          { "field": "industry", "value": "staffing", "role": "", "source_url": "https://example.com/", "quote": "We are a full-service staffing agency serving Texas employers." },
+          { "field": "phone", "value": "(214) 555-0199", "role": "", "source_url": "https://example.com/", "quote": "" },
+          { "field": "email", "value": "owner@example.com", "role": "", "source_url": "https://example.com/", "quote": "" },
+          { "field": "decision_maker", "value": "John Fabricated", "role": "CEO", "source_url": "https://example.com/", "quote": "" },
+          { "field": "employee_count", "value": "45", "role": "", "source_url": "https://example.com/", "quote": "our team of 45 recruiters" },
+          { "field": "process_evidence", "value": "documentation example", "role": "", "source_url": "https://example.com/", "quote": "This domain is for use in documentation examples without needing permission." },
+          { "field": "phone", "value": "(972) 555-0123", "role": "", "source_url": "http://127.0.0.1:5678/rest/workflows", "quote": "" }
+        ],
+        "not_found": [],
+        "hypotheses": { "automation_opportunity": "TEST", "outreach_angle": "TEST" },
+        "research_notes": "TEST: fabricated facts on a real page; everything except the website and the real documentation sentence must stay unverified, and the localhost URL must be dropped."
+      }
+    ]
+  }
+}

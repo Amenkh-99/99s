@@ -1,0 +1,13 @@
+{
+  "name": "lead-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local-first, zero-cost B2B lead research: Claude Code research, n8n verification and scoring, CSV export.",
+  "license": "UNLICENSED",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "test": "node --test",
+    "build-workflow": "node n8n/build-workflow.js",
+    "research": "node scripts/research.js"
+  }
+}

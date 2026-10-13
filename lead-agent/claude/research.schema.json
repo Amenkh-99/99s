@@ -1,0 +1,48 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["companies"],
+  "properties": {
+    "companies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["company_name", "website", "state", "is_target_industry", "discovery_source", "facts", "not_found", "hypotheses", "research_notes"],
+        "properties": {
+          "company_name": { "type": "string" },
+          "website": { "type": "string", "description": "Official website URL actually visited, or empty string" },
+          "state": { "type": "string", "description": "Two-letter US state code of the main office, or empty string" },
+          "is_target_industry": { "type": "boolean", "description": "true only if the company's own website shows it is a staffing/recruiting business in the target niche" },
+          "discovery_source": { "type": "string" },
+          "facts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["field", "value", "role", "source_url", "quote"],
+              "properties": {
+                "field": { "type": "string", "enum": ["industry", "location", "employee_count", "phone", "email", "decision_maker", "process_evidence", "job_volume"] },
+                "value": { "type": "string" },
+                "role": { "type": "string", "description": "Job title, only for decision_maker; otherwise empty string" },
+                "source_url": { "type": "string", "description": "Exact URL of the page you fetched that shows this fact" },
+                "quote": { "type": "string", "description": "Short text copied character-for-character from that page" }
+              }
+            }
+          },
+          "not_found": { "type": "array", "items": { "type": "string" } },
+          "hypotheses": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["automation_opportunity", "outreach_angle"],
+            "properties": {
+              "automation_opportunity": { "type": "string" },
+              "outreach_angle": { "type": "string" }
+            }
+          },
+          "research_notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

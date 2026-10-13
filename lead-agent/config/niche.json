@@ -1,0 +1,68 @@
+{
+  "niche_id": "us-staffing-recruiting",
+  "description": "US staffing and recruiting agencies that could benefit from automating employer-request intake, lead qualification, candidate screening, or follow-up.",
+  "country": "United States",
+  "industry_label": "staffing and recruiting",
+  "industry_keywords": [
+    "staffing agency",
+    "staffing firm",
+    "recruiting firm",
+    "recruitment agency",
+    "temp agency",
+    "executive search"
+  ],
+  "exclude_keywords": [
+    "job board",
+    "staffing software",
+    "applicant tracking system",
+    "franchise headquarters"
+  ],
+  "decision_maker_titles": [
+    "Owner",
+    "Founder",
+    "President",
+    "CEO",
+    "Managing Director",
+    "Managing Partner",
+    "Director of Operations",
+    "VP of Operations"
+  ],
+  "locations": [],
+  "employee_range": { "min": 10, "max": 100 },
+  "opportunity_signals": [
+    "employer 'request talent' / 'submit a job order' / 'hire staff' form or page",
+    "instructions to email or call to place a staffing order",
+    "candidate application by email, PDF, or downloadable form",
+    "large number of open job postings on their own site",
+    "multiple branch offices or specialties handled by a small team",
+    "no online scheduling or instant response for employers or candidates"
+  ],
+  "offer_summary": "Automation of employer-request intake, lead qualification, candidate screening, and follow-up using n8n and AI.",
+  "run_limits": {
+    "candidates_per_discovery_run": 25,
+    "companies_per_research_batch": 5,
+    "max_research_batches_per_run": 4,
+    "discovery_max_turns": 25,
+    "research_max_turns": 60,
+    "pause_seconds_between_claude_runs": 20
+  },
+  "scoring": {
+    "qualified_min_score": 55,
+    "review_min_score": 35
+  },
+  "claude": {
+    "model": "sonnet",
+    "timeout_minutes": 25
+  },
+  "ollama": {
+    "enabled": true,
+    "url": "http://127.0.0.1:11434",
+    "model": "llama3.2:3b",
+    "affects_score": false
+  },
+  "verification": {
+    "max_pages_per_run": 150,
+    "delay_ms": 1500,
+    "timeout_ms": 20000
+  }
+}

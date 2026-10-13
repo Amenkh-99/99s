@@ -1,0 +1,53 @@
+# Minimal CI for lead-agent. Runs on pull requests and on demand only (no schedule).
+# Uses no secrets, installs no packages beyond Node itself, deploys nothing and
+# never runs Claude Code, n8n, Ollama or any lead-generation step.
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: lead-agent
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # Every committed .json file parses; the Claude output schemas are well-formed.
+      - name: Validate JSON files
+        run: node scripts/validate-json.js ..
+
+      # Every JavaScript file is syntactically valid (no linter is configured in this repo).
+      - name: JavaScript syntax check
+        run: |
+          for f in $(git ls-files '*.js'); do node --check "$f" && echo "ok  $f"; done
+
+      # Unit tests: normalization, claim verification, scoring, dedupe, CSV, guard hook,
+      # and the generated n8n workflow (valid, inactive, manual trigger only, Code nodes compile).
+      - name: Unit tests
+        run: node --test
+
+      # The Windows scripts parse, and stay ASCII-only so Windows PowerShell 5.1 reads them correctly.
+      - name: PowerShell syntax check
+        shell: pwsh
+        run: |
+          $failed = $false
+          foreach ($f in Get-ChildItem scripts/*.ps1) {
+            $tokens = $null; $errs = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($f.FullName, [ref]$tokens, [ref]$errs) | Out-Null
+            if ($errs) { $failed = $true; $errs | ForEach-Object { "::error file=lead-agent/scripts/$($f.Name),line=$($_.Extent.StartLineNumber)::$($_.Message)" } }
+            elseif (Select-String -Path $f.FullName -Pattern '[^\x00-\x7F]' -Quiet) { $failed = $true; "::error file=lead-agent/scripts/$($f.Name)::non-ASCII character" }
+            else { "ok  $($f.Name)" }
+          }
+          if ($failed) { exit 1 }

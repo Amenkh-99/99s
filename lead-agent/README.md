@@ -244,6 +244,27 @@ To inspect the workflow visually (optional):
 | Firecrawl not visible / guard denies it | Use `-NoApollo`; web search alone works. |
 | Wrong Claude found / `claude` not found | Set `$env:LEAD_AGENT_CLAUDE` to the full path shown by `where.exe claude`. |
 
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every pull request, or by hand from the Actions tab. It never runs on a schedule. It uses no secrets, installs nothing but Node 24, and deploys nothing. It never calls Claude, n8n, Ollama, Firecrawl or any website.
+
+| Check | What it verifies |
+|---|---|
+| Validate JSON files | Every committed `.json` file parses. The Claude output schemas are well-formed: each required field exists and every type is known. |
+| JavaScript syntax check | `node --check` on every `.js` file. There's no linter configured, so this is the lint step. |
+| Unit tests (`node --test`) | Normalization, claim verification, scoring, deduplication, CSV export and the zero-cost guard hook. Also builds the n8n workflow and checks it: valid JSON, connected nodes, Code nodes that compile, inactive, **manual trigger only**, and no schedule, webhook, shell or email nodes. |
+| PowerShell syntax check | The Windows scripts parse, and are ASCII-only (required by Windows PowerShell 5.1). |
+
+Run the same checks locally with `node scripts/validate-json.js ..` and `node --test`.
+
+**Not covered by CI:**
+- importing or executing the workflow in a real n8n;
+- live research with Claude Code;
+- Ollama scoring;
+- running the PowerShell scripts on Windows.
+
+Those are covered by `scripts\test-offline.ps1` and `check-env.ps1 -Live` on your PC.
+
 ## Project layout
 
 ```
@@ -256,7 +277,7 @@ scripts/research.js        research runner (discovery, dedupe, batches, retries,
 scripts/*.ps1              Windows entry points (check, setup, run, test, archive)
 src/core.js                normalization, verification, scoring, dedupe, CSV (embedded in n8n)
 n8n/build-workflow.js      generates the n8n workflow for your folder
-test/                      unit tests and the fabricated-data fixture
+test/                      unit tests, workflow checks and the fabricated-data fixture
 data/  (git-ignored)       inbox, database, exports, logs, generated workflow
 ```
 

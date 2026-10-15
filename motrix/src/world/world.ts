@@ -48,6 +48,7 @@ export class World {
   private readonly power: FlowLine[][] = [[], [], []]; // [phase][segment A,B,C,D]
   private readonly signals: FlowLine[] = [];
   private readonly commands: FlowLine[] = [];
+  private powerLines: FlowLine[] = [];
   private time = 0;
   private stageScale = 1;
   private readonly tmp = new THREE.Vector3();
@@ -109,6 +110,7 @@ export class World {
     this.scene.add(this.motor.group, this.equipment.cabinet, this.equipment.sensorsFloor, this.equipment.sensorsMotor, this.cables);
     this.buildConductors();
     this.buildSignals();
+    this.powerLines = this.power.flat();
     this.anchors = { ...this.motor.anchors, ...this.equipment.anchors };
   }
 
@@ -171,7 +173,7 @@ export class World {
       S([[-1.38, 0.13, -0.45], [-1.38, 0.26, -0.45], [-1.38, 0.26, -1.02], [-1.38, 1.5, -1.02]]),
       S([[-1.22, 0.11, -0.66], [-1.22, 0.22, -0.66], [-1.22, 0.22, -1.02], [-1.22, 1.5, -1.02]]),
       S([[1.1, 0.69, -0.27], [1.1, 0.86, -0.27], [1.1, 0.86, -0.74], [1.1, 0.03, -0.74], [-1.1, 0.03, -0.74], [-1.1, 0.03, -1.02], [-1.1, 1.5, -1.02]]),
-      S([[1.8, 0.62, 0], [1.92, 0.62, 0], [1.92, 0.03, 0], [1.92, 0.03, -0.8], [-0.98, 0.03, -0.8], [-0.98, 0.03, -1.02], [-0.98, 1.5, -1.02]]),
+      S([[1.78, 0.65, 0], [1.78, 0.84, 0], [1.78, 0.84, -0.8], [1.78, 0.03, -0.8], [-0.98, 0.03, -0.8], [-0.98, 0.03, -1.02], [-0.98, 1.5, -1.02]]),
     ];
     for (const pts of sig) {
       const l = new FlowLine(pts, { kind: 'signal', radius: 0.006, density: 6, cornerRadius: 0.06 });
@@ -289,7 +291,7 @@ export class World {
 
     this.updateFlowTargets();
     const animate = !this.reducedMotion;
-    for (const l of this.power.flat()) l.update(dt, animate);
+    for (const l of this.powerLines) l.update(dt, animate);
     for (const l of this.signals) {
       l.setGlow(TONE_COLOR[s.signalTone]);
       l.update(dt, animate);

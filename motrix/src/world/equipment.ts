@@ -58,6 +58,7 @@ export class Equipment {
   private readonly alarmMat: THREE.MeshBasicMaterial[] = [];
   private readonly breakMarker: THREE.Mesh;
   private time = 0;
+  private static readonly OFF = new THREE.Color(0x000000);
 
   constructor(private readonly mats: MaterialSet, motorGroup: THREE.Group) {
     this.channelLeds = emissiveMaterial();
@@ -341,9 +342,8 @@ export class Equipment {
     this.breakerLever.rotation.x = 0.6 - 1.2 * d.breaker;
     this.bridges.position.y = 1.25 - 0.024 * (1 - d.contactor);
 
-    const off = new THREE.Color(0x000000);
     const set = (m: THREE.MeshStandardMaterial, c: THREE.Color | null, k = 1) => {
-      m.emissive.copy(c ?? off);
+      m.emissive.copy(c ?? Equipment.OFF);
       m.emissiveIntensity = c ? k : 0;
     };
     // voyants : couleurs de présentation (cyan / ambre / rouge), pas les couleurs réelles

@@ -421,6 +421,6 @@ export class Motor {
     }
 
     // teinte d'échauffement (illustration)
-    this.paint.emissive.setRGB(0.3 * d.heat, 0.045 * d.heat, 0.008 * d.heat);
+    this.paint.emissive.setRGB(0.17 * d.heat, 0.028 * d.heat, 0.004 * d.heat);
   }
 }

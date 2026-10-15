@@ -1,0 +1,47 @@
+/*
+ * MOTRIX — jetons de design.
+ * Fond nuit d'atelier, graphite, et trois couleurs d'état réservées :
+ * cyan = fonctionnement normal / signal, ambre = avertissement, rouge = défaut.
+ * Ces couleurs sont un code de présentation ; elles ne décrivent pas le matériel réel.
+ */
+:root {
+  color-scheme: dark;
+
+  --bg: #070b14;
+  --bg-2: #0b1220;
+  --panel: rgba(10, 15, 26, 0.84);
+  --panel-solid: #0d1424;
+  --graphite: #2b3038;
+  --line: rgba(160, 180, 210, 0.16);
+  --line-2: rgba(160, 180, 210, 0.3);
+  --line-3: rgba(160, 180, 210, 0.48);
+
+  --ink: #e8edf4;
+  --ink-2: #aab5c5;
+  --ink-3: #8390a3;
+
+  --cyan: #3cc6ee;
+  --cyan-ink: #74d8f6;
+  --cyan-dim: rgba(60, 198, 238, 0.14);
+  --amber: #f2a93b;
+  --amber-ink: #f7c06a;
+  --amber-dim: rgba(242, 169, 59, 0.16);
+  --red: #e5484d;
+  --red-ink: #ff8487;
+  --red-dim: rgba(229, 72, 77, 0.16);
+
+  --font-body: 'Barlow', 'Segoe UI', Arial, sans-serif;
+  --font-cond: 'Barlow Condensed', 'Arial Narrow', 'Segoe UI', Arial, sans-serif;
+
+  /* échelle typographique (pixels de la scène 1920 × 1080) */
+  --fs-title: 66px;
+  --fs-xl: 34px;
+  --fs-lede: 27px;
+  --fs-body: 24px;
+  --fs-small: 20px;
+  --fs-fine: 18px;
+
+  --gutter: 120px;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --t-step: 0.55s;
+}

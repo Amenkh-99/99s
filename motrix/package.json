@@ -1,0 +1,28 @@
+{
+  "name": "motrix-presentation",
+  "private": true,
+  "version": "1.0.0",
+  "description": "MOTRIX — présentation 3D interactive : protection intelligente d'un moteur asynchrone triphasé",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "serve": "node scripts/serve.mjs",
+    "e2e": "node tests/e2e/run.mjs"
+  },
+  "dependencies": {
+    "@fontsource/barlow": "5.2.8",
+    "@fontsource/barlow-condensed": "5.2.8",
+    "gsap": "3.15.0",
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "@types/three": "0.186.0",
+    "playwright": "1.56.1",
+    "typescript": "5.9.3",
+    "vite": "8.3.1",
+    "vitest": "4.1.11"
+  }
+}

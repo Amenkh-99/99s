@@ -1,0 +1,145 @@
+* {
+  box-sizing: border-box;
+}
+body.presenter {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.pv-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  padding: 20px 28px 14px;
+  border-bottom: 1px solid var(--line-2);
+}
+.pv-num {
+  font: 600 16px var(--font-cond);
+  color: var(--ink-3);
+}
+.pv-title {
+  margin: 4px 0 0;
+  font: 600 34px/1.1 var(--font-cond);
+}
+.pv-timer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pv-time {
+  font: 600 40px var(--font-cond);
+  font-variant-numeric: tabular-nums;
+  margin-right: 8px;
+}
+.pv-time.is-late {
+  color: var(--amber-ink);
+}
+.pv-main {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 28px;
+  padding: 22px 28px;
+}
+.pv-notes p {
+  margin: 0 0 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 22px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+.pv-notes p.is-current {
+  color: var(--ink);
+  background: var(--cyan-dim);
+  font-size: 26px;
+}
+.pv-step {
+  margin: 0 0 10px;
+  font: 600 20px var(--font-cond);
+  color: var(--cyan-ink);
+}
+.pv-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.pv-btn {
+  font: 500 15px var(--font-body);
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  min-height: 40px;
+}
+.pv-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.pv-btn:focus-visible,
+.pv-list button:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+.pv-btn--big {
+  min-height: 56px;
+  font-size: 17px;
+}
+.pv-btn--primary {
+  border-color: var(--cyan);
+  background: var(--cyan-dim);
+}
+.pv-next {
+  color: var(--ink-2);
+  margin: 14px 0 22px;
+}
+.pv-side h2 {
+  font: 600 18px var(--font-cond);
+  color: var(--ink-3);
+  margin: 0 0 6px;
+}
+.pv-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 52vh;
+  overflow: auto;
+}
+.pv-list li {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  align-items: center;
+  border-radius: 6px;
+}
+.pv-list li.is-current {
+  background: var(--cyan-dim);
+}
+.pv-list input {
+  accent-color: var(--cyan);
+  width: 16px;
+  height: 16px;
+}
+.pv-list button {
+  text-align: left;
+  background: none;
+  border: 0;
+  color: var(--ink-2);
+  font: 400 15px var(--font-body);
+  padding: 7px 6px;
+  cursor: pointer;
+}
+.pv-status {
+  font-size: 14px;
+  color: var(--ink-3);
+  margin-top: 14px;
+}

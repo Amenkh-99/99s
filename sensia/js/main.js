@@ -1,5 +1,6 @@
 // Point d'entrée : navigation entre diapositives, lecture/pause des
 // animations, mise à l'échelle 16:9, commandes clavier et souris.
+import * as THREE from 'three';
 import { Engine, webglAvailable } from './engine.js';
 import { IntroView } from './scenes/intro.js';
 import { HeroView } from './scenes/hero.js';
@@ -23,7 +24,10 @@ const speech = new Speech();
 let engine = null;
 if (webglAvailable()) {
   try {
-    engine = new Engine($('#gl'));
+    // ?qualite=haute | moyenne | basse (sinon : automatique à partir de "haute")
+    const q = new URLSearchParams(location.search).get('qualite');
+    const forced = { haute: 0, moyenne: 1, basse: 3 }[q];
+    engine = new Engine($('#gl'), { tier: forced ?? 0, adaptive: forced === undefined });
   } catch (e) {
     console.warn('WebGL indisponible :', e);
     engine = null;
@@ -155,6 +159,11 @@ function go(i) {
   } catch (e) {
     /* contexte sans historique */
   }
+  // fondu d'entrée de la zone 3D
+  const area = $('#canvas-area');
+  area.classList.remove('enter');
+  void area.offsetWidth;
+  area.classList.add('enter');
   // mise à jour immédiate (pas de flash d'un état ancien)
   c.update(0, 0, clock);
   renderOnce();
@@ -192,7 +201,7 @@ function fireCues(c, from, to) {
 function renderOnce() {
   const c = controller(index);
   if (engine && c.scene && app.currentArea !== 'none') {
-    engine.render();
+    engine.render(clock);
     if (c.afterRender) c.afterRender();
   }
 }
@@ -220,6 +229,7 @@ function frame(nowMs) {
     } else fireCues(c, prev, t);
   }
   c.update(t, dt, clock, real);
+  if (engine) engine.adapt(real);
   renderOnce();
 
   // étapes et progression
@@ -318,6 +328,24 @@ $$('#legend li').forEach((li) => {
   li.addEventListener('focus', on);
   li.addEventListener('mouseleave', off);
   li.addEventListener('blur', off);
+  // clic : la caméra vole vers la pièce ; second clic : retour à la vue d'ensemble
+  const pick = () => {
+    const v = viewCache.exploded;
+    if (!v) return;
+    const i = +li.dataset.i;
+    const next = v.pinned === i ? -1 : i;
+    v.focusOn(next);
+    $$('#legend li').forEach((x) => x.classList.toggle('pinned', +x.dataset.i === next));
+    if (next >= 0) $$('[data-explode]').forEach((x) => x.setAttribute('aria-pressed', x.dataset.explode === 'open' ? 'true' : 'false'));
+    $('#overview').hidden = next < 0;
+  };
+  li.addEventListener('click', pick);
+  li.addEventListener('keydown', (e) => e.key === 'Enter' && pick());
+});
+$('#overview').addEventListener('click', () => {
+  viewCache.exploded?.focusOn(-1);
+  $$('#legend li').forEach((x) => x.classList.remove('pinned'));
+  $('#overview').hidden = true;
 });
 
 // Diapositive 4 : flux du synoptique

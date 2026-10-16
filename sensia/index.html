@@ -121,12 +121,13 @@
           <li data-i="8"><i>9</i><div><b>Écouteurs</b><span>diffusent les messages vocaux</span></div></li>
           <li data-i="9"><i>10</i><div><b>Batterie rechargeable</b><span>alimente le système</span></div></li>
         </ol>
-        <div class="row">
+        <div class="row compact">
           <button class="chip-btn" data-explode="open">Éclater</button>
           <button class="chip-btn" data-explode="closed">Assembler</button>
           <button class="chip-btn" data-explode="auto" aria-pressed="true">Automatique</button>
+          <button class="chip-btn" id="overview" hidden>Vue d'ensemble</button>
         </div>
-        <p class="note">Modèle illustratif : formes simplifiées et positions conceptuelles, pas un montage validé. Faites glisser pour tourner le modèle.</p>
+        <p class="note">Modèle illustratif, pas un montage validé. Glissez pour tourner ; cliquez une pièce pour zoomer.</p>
       </div>
     </section>
 
@@ -149,6 +150,11 @@
       <div class="synoptic-wrap">
         <svg viewBox="0 0 1000 660" class="synoptic" role="img" aria-label="Schéma synoptique de SENSIA">
           <defs>
+            <!-- dégradés du schéma : remplissage verre des blocs, liseré actif, flux de données -->
+            <linearGradient id="nodeFill" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16345f" stop-opacity="0.92"/><stop offset="1" stop-color="#070f22" stop-opacity="0.95"/></linearGradient>
+            <linearGradient id="nodeEdge" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b6fbff"/><stop offset="0.5" stop-color="#2ee6f0"/><stop offset="1" stop-color="#5aa9ff"/></linearGradient>
+            <linearGradient id="coreText" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#2ee6f0"/></linearGradient>
+            <linearGradient id="flowGrad" gradientUnits="userSpaceOnUse" x1="200" y1="0" x2="760" y2="0"><stop offset="0" stop-color="#5aa9ff"/><stop offset="0.5" stop-color="#2ee6f0"/><stop offset="1" stop-color="#b6fbff"/></linearGradient>
             <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="arrow-head"/></marker>
             <marker id="arr-p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="arrow-head-p"/></marker>
           </defs>

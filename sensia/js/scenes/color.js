@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { View, placeBubble } from './base.js';
 import { createStage, createApple, createCube, createPlant } from '../models/props.js';
 import { createPerson } from '../models/person.js';
-import { SoundRings, FlowLine, outlineShell, makeBeam, dustField } from '../models/effects.js';
+import { SoundRings, FlowLine, outlineShell, makeBeam, dustField, scanRing, SpectrumStreams } from '../models/effects.js';
 import { smooth, windowed, lerp } from '../util.js';
 
 export const OBJECTS = {
@@ -30,7 +30,7 @@ export class ColorView extends View {
     this.hud = hud;
     this.duration = 16;
     this.key = 'rouge';
-    this.bloom = { strength: 0.7, radius: 0.55, threshold: 0.8 };
+    this.bloom = { strength: 0.6, radius: 0.5, threshold: 1.0 };
     this.cues = [{ t: 11, fn: () => app.speak(OBJECTS[this.key].message) }];
   }
 
@@ -61,8 +61,14 @@ export class ColorView extends View {
     this.reflect = new FlowLine(scene, '#ff4545', 0.0022, { speed: -1.6 });
     this.beam = makeBeam('#ffffff', 1, 0.045, new THREE.Vector3(0, 0, 1));
     scene.add(this.beam);
-    this.tcsLight = new THREE.PointLight('#ffffff', 0, 0.6, 2);
-    scene.add(this.tcsLight);
+    this.beam.onBeforeRender = () => (this.beam.material.uniforms.uTime.value = performance.now() / 1000);
+    // lumière blanche étalonnée : projecteur étroit du TCS3200 vers l'objet
+    this.tcsLight = new THREE.SpotLight('#f4f8ff', 0, 1.2, 0.16, 0.85, 1.5);
+    scene.add(this.tcsLight, this.tcsLight.target);
+    // anneau de balayage (calibrage) et flux R / V / B renvoyés vers le capteur
+    this.scan = scanRing();
+    scene.add(this.scan);
+    this.spectrum = new SpectrumStreams(scene);
     this.rings = [new SoundRings(p.buds[1], new THREE.Vector3(1, 0, 0)), new SoundRings(p.buds[-1], new THREE.Vector3(-1, 0, 0))];
 
     const g = p.glasses.parts;
@@ -91,7 +97,12 @@ export class ColorView extends View {
     this.bubble.innerHTML = `<div class="bubble-box"><span class="bubble-icon" aria-hidden="true"></span><span>« ${o.message} »</span></div>`;
   }
 
-  update(t, dt, clock) {
+  update(t, dt, clock, realDt = dt) {
+    // caméra en gros plan, légère respiration
+    const az = 0.62 + Math.sin(clock * 0.2) * 0.06;
+    this.camera.position.set(Math.sin(az) * 1.25, 1.62, Math.cos(az) * 1.25 + 0.15);
+    this.camera.lookAt(0.02, 1.5, 0.2);
+    this.applyEntrance(realDt);
     const p = this.person;
     const o = OBJECTS[this.key];
     const obj = this.objects[this.key];
@@ -134,10 +145,22 @@ export class ColorView extends View {
     this.beam.scale.set(1, dist * 0.92, 1);
     this.beam.material.uniforms.uOpacity.value = measure * 0.22;
     this.beam.visible = measure > 0.01;
-    this.tcsLight.position.copy(this._w).addScaledVector(dir, -0.06);
-    this.tcsLight.intensity = measure * 0.2;
+    this.tcsLight.position.copy(this._v);
+    this.tcsLight.target.position.copy(this._w);
+    this.tcsLight.intensity = measure * 1.6;
+    // balayage d'avant en arrière à travers l'objet pendant la mesure
+    const R = obj.userData.radius * 1.15;
+    const sweep = Math.sin((t - 6) * 3.2) * R * 0.85;
+    const slice = Math.sqrt(Math.max(0.05, 1 - (sweep / R) ** 2)) * R;
+    this.scan.position.copy(this._w).addScaledVector(dir, sweep);
+    this.scan.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
+    this.scan.scale.setScalar(slice);
+    this.scan.material.opacity = measure * 0.9;
+    this.scan.visible = measure > 0.01;
+    const back = windowed(t, 6.4, 6.9, 8.4, 8.9);
+    this.spectrum.update(this._w.clone().addScaledVector(dir, -R * 0.9), this._v, o.rgb, clock, back);
     this.aim.set(this._v, this._w, windowed(t, 1.8, 2.3, 5.6, 6) * 0.9, clock);
-    this.reflect.set(this._w.clone().addScaledVector(dir, -0.03), this._v, windowed(t, 6.4, 6.8, 8.4, 8.8), clock);
+    this.reflect.set(this._w.clone().addScaledVector(dir, -0.03), this._v, windowed(t, 6.4, 6.8, 8.4, 8.8) * 0.6, clock);
 
     this.shells[this.key].update(windowed(t, 3, 3.5, 14.5, 15.5) * (0.55 + 0.2 * Math.sin(clock * 4)));
     const speaking = windowed(t, 10.5, 10.8, 13.6, 14);
@@ -153,10 +176,6 @@ export class ColorView extends View {
     this._b.x -= 0.12;
     placeBubble(this.engine, this.bubble, this._b, t >= 11);
 
-    // caméra en gros plan, légère respiration
-    const az = 0.62 + Math.sin(clock * 0.2) * 0.06;
-    this.camera.position.set(Math.sin(az) * 1.25, 1.62, Math.cos(az) * 1.25 + 0.15);
-    this.camera.lookAt(0.02, 1.5, 0.2);
 
     const bars = o.rgb.map((v) => v * smooth(6.4, 8, t));
     this.hud.update({

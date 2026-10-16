@@ -6,21 +6,24 @@ import { createGlasses } from './glasses.js';
 import { cable, MAT } from '../util.js';
 import { createBeltBox } from './modules.js';
 
-const SKIN = new THREE.MeshStandardMaterial({ color: '#c99474', roughness: 0.62 });
-const HAIR = new THREE.MeshStandardMaterial({ color: '#2a1d16', roughness: 0.85 });
-const SHIRT = new THREE.MeshStandardMaterial({ color: '#4c6f9e', roughness: 0.8 });
-const PANTS = new THREE.MeshStandardMaterial({ color: '#232c3d', roughness: 0.85 });
-const SHOE = new THREE.MeshStandardMaterial({ color: '#8e99a8', roughness: 0.75 });
-const SOLE = new THREE.MeshStandardMaterial({ color: '#2b2f36', roughness: 0.9 });
-const BUD = new THREE.MeshPhysicalMaterial({ color: '#1d222b', roughness: 0.3, clearcoat: 1 });
-const CABLE = new THREE.MeshStandardMaterial({ color: '#20242c', roughness: 0.6 });
+// Matériaux : peau satinée (reflet doux de type "sheen"), textiles mats à
+// reflet de fibre, cuir verni, plastiques laqués des écouteurs.
+const SKIN = new THREE.MeshPhysicalMaterial({ color: '#c99474', roughness: 0.55, sheen: 0.35, sheenColor: '#ffcfb0', sheenRoughness: 0.6 });
+const HAIR = new THREE.MeshPhysicalMaterial({ color: '#241812', roughness: 0.6, sheen: 1, sheenColor: '#6b4a36', sheenRoughness: 0.35 });
+const SHIRT = new THREE.MeshPhysicalMaterial({ color: '#46679a', roughness: 0.82, sheen: 1, sheenColor: '#9cc0ff', sheenRoughness: 0.5 });
+const PANTS = new THREE.MeshStandardMaterial({ color: '#1f2738', roughness: 0.85 });
+const SHOE = new THREE.MeshStandardMaterial({ color: '#8e99a8', roughness: 0.5 });
+const SOLE = new THREE.MeshStandardMaterial({ color: '#23272e', roughness: 0.9 });
+const BELT = new THREE.MeshPhysicalMaterial({ color: '#17191d', roughness: 0.4, clearcoat: 0.7 });
+const BUD = new THREE.MeshPhysicalMaterial({ color: '#1b2029', roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.05, metalness: 0.2 });
+const CABLE = new THREE.MeshPhysicalMaterial({ color: '#20242c', roughness: 0.4, clearcoat: 0.6 });
 
 const UP_ARM = 0.29;
 const FORE_ARM = 0.285;
 const DOWN = new THREE.Vector3(0, -1, 0);
 
 function limb(r, len, mat) {
-  const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 6, 16), mat);
+  const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 10, 28), mat);
   m.position.y = -len / 2;
   m.castShadow = true;
   return m;
@@ -33,16 +36,27 @@ export function createPerson({ cane = false } = {}) {
   root.add(body);
 
   // Tronc
-  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.16, 0.3, 8, 24), SHIRT);
+  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.16, 0.3, 16, 48), SHIRT);
   torso.scale.set(1, 1, 0.62);
   torso.position.y = 1.2;
   torso.castShadow = true;
-  const hips = new THREE.Mesh(new THREE.CapsuleGeometry(0.14, 0.08, 8, 20), PANTS);
+  const hips = new THREE.Mesh(new THREE.CapsuleGeometry(0.14, 0.08, 16, 40), PANTS);
   hips.scale.set(1.05, 1, 0.7);
   hips.position.y = 0.97;
   const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 0.1, 16), SKIN);
   neck.position.y = 1.5;
-  body.add(torso, hips, neck);
+  // ceinture : masque la jonction tronc / bassin
+  const belt = new THREE.Mesh(new THREE.TorusGeometry(1, 0.11, 12, 64), BELT);
+  belt.scale.set(0.152, 0.152 * 0.9, 0.108);
+  belt.rotation.x = Math.PI / 2;
+  belt.position.y = 1.035;
+  const buckle = new THREE.Mesh(new RoundedBoxGeometry(0.04, 0.026, 0.008, 2, 0.003), MAT.titanium);
+  buckle.position.set(0, 1.035, 0.106);
+  // col de chemise
+  const collar = new THREE.Mesh(new THREE.TorusGeometry(0.058, 0.014, 10, 40), SHIRT);
+  collar.rotation.x = Math.PI / 2;
+  collar.position.y = 1.47;
+  body.add(torso, hips, neck, belt, buckle, collar);
 
   // Tête (pivot au cou pour pouvoir l'incliner)
   const headPivot = new THREE.Group();
@@ -51,10 +65,10 @@ export function createPerson({ cane = false } = {}) {
   const head = new THREE.Group();
   head.position.y = 0.11;
   headPivot.add(head);
-  const skull = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 28), SKIN);
+  const skull = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 48), SKIN);
   skull.scale.set(0.079, 0.104, 0.094);
   skull.castShadow = true;
-  const hair = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 20, 0, Math.PI * 2, 0, 1.75), HAIR);
+  const hair = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 32, 0, Math.PI * 2, 0, 1.75), HAIR);
   hair.scale.set(0.083, 0.108, 0.099);
   hair.rotation.x = -0.42;
   hair.position.set(0, 0.006, -0.006);
@@ -64,6 +78,13 @@ export function createPerson({ cane = false } = {}) {
   const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.011, 0.0018, 6, 20, Math.PI), new THREE.MeshStandardMaterial({ color: '#8a4b3c', roughness: 0.6 }));
   mouth.rotation.z = Math.PI;
   mouth.position.set(0, -0.05, 0.083);
+  // sourcils (fins, discrets)
+  for (const sx of [-1, 1]) {
+    const brow = new THREE.Mesh(new THREE.CapsuleGeometry(0.003, 0.02, 4, 8), HAIR);
+    brow.rotation.z = Math.PI / 2 + sx * 0.12;
+    brow.position.set(sx * 0.033, 0.03, 0.088);
+    head.add(brow);
+  }
   head.add(skull, hair, nose, mouth);
   for (const sx of [-1, 1]) {
     const ear = new THREE.Mesh(new THREE.SphereGeometry(0.02, 16, 12), SKIN);
@@ -73,7 +94,8 @@ export function createPerson({ cane = false } = {}) {
   }
 
   // Lunettes SENSIA
-  const glasses = createGlasses();
+  // verres sans transmission sur le personnage (petits à l'écran, rendu bien plus léger)
+  const glasses = createGlasses({ lens: 'light' });
   glasses.group.position.set(0, 0.004, 0.091);
   glasses.group.rotation.x = 0.04;
   head.add(glasses.group);
@@ -117,12 +139,20 @@ export function createPerson({ cane = false } = {}) {
     const fore = limb(0.04, FORE_ARM - 0.06, SKIN);
     const hand = new THREE.Group();
     hand.position.y = -FORE_ARM;
-    const palm = new THREE.Mesh(new RoundedBoxGeometry(0.05, 0.075, 0.028, 3, 0.012), SKIN);
-    palm.position.y = -0.01;
+    const palm = new THREE.Mesh(new RoundedBoxGeometry(0.05, 0.052, 0.026, 4, 0.011), SKIN);
+    palm.position.y = -0.004;
     palm.castShadow = true;
-    const thumb = new THREE.Mesh(new THREE.CapsuleGeometry(0.009, 0.025, 4, 8), SKIN);
-    thumb.position.set(-sx * 0.0, -0.005, 0.02);
-    thumb.rotation.x = 0.8;
+    // quatre doigts légèrement repliés + pouce
+    for (let f = 0; f < 4; f++) {
+      const finger = new THREE.Mesh(new THREE.CapsuleGeometry(0.0062, 0.024, 6, 12), SKIN);
+      finger.position.set((f - 1.5) * 0.0122, -0.042, 0.004);
+      finger.rotation.x = 0.35;
+      finger.castShadow = true;
+      hand.add(finger);
+    }
+    const thumb = new THREE.Mesh(new THREE.CapsuleGeometry(0.0075, 0.022, 6, 12), SKIN);
+    thumb.position.set(sx * 0.024, -0.014, 0.012);
+    thumb.rotation.set(0.7, 0, sx * 0.5);
     hand.add(palm, thumb);
     elbow.add(fore, hand);
     shoulder.add(upper, elbow);

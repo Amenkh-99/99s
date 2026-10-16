@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { View, placeBubble } from './base.js';
 import { createStage, createCardboardBox, createPillar } from '../models/props.js';
 import { createPerson } from '../models/person.js';
-import { SonarPulses, SoundRings, FlowLine, groundRing, dustField } from '../models/effects.js';
+import { SonarPulses, SoundRings, FlowLine, groundRing, dustField, detectionCone } from '../models/effects.js';
 import { smooth, windowed, clamp, lerp } from '../util.js';
 
 export const OBSTACLE_MESSAGE = 'Attention, il y a un obstacle devant vous.';
@@ -57,6 +57,7 @@ export class ObstacleView extends View {
       for (const x of [-1.9]) {
         const p = createPillar(3);
         p.position.set(x, 1.5, z);
+        p.rotation.y = Math.PI / 2; // bandeaux LED tournés vers le couloir
         scene.add(p);
       }
     }
@@ -66,6 +67,11 @@ export class ObstacleView extends View {
     const p = createPerson();
     this.person = p;
     scene.add(p.root);
+
+    // volume de mesure translucide devant le capteur (représentation visuelle)
+    this.cone = detectionCone(2.4, 0.42);
+    this.cone.position.z = 0.012;
+    p.glasses.parts.hc.add(this.cone);
 
     this.sonar = new SonarPulses(scene, { start: 3, interval: 0.9, speed: 1.4 });
     this.sonar.enabledUntil = 11.5;
@@ -97,9 +103,15 @@ export class ObstacleView extends View {
     return this.faceZ - (Z0 + walked(t) + 0.105);
   }
 
-  update(t, dt, clock) {
+  update(t, dt, clock, realDt = dt) {
     const p = this.person;
     const z = Z0 + walked(t);
+    // caméra latérale qui accompagne la marche
+    const mid = (z + 1.95) / 2;
+    const drift = Math.sin(clock * 0.15) * 0.15;
+    this.camera.position.set(3.7 + drift, 2.05, mid - 2.3);
+    this.camera.lookAt(0, 1.1, mid + 0.05);
+    this.applyEntrance(realDt);
     // vitesse instantanée → amplitude de la marche
     const v = t < 8.4 ? V : V * (1 - clamp(t - 8.4, 0, 1));
     const amp = (v / V) * 0.85;
@@ -124,6 +136,9 @@ export class ObstacleView extends View {
     this._t.set(this._s.x, this._s.y, this.faceZ);
     this.sonar.update(t, hc, this._t);
 
+    this.cone.material.uniforms.uOpacity.value = windowed(t, 2.6, 3.4, 11.5, 12.5);
+    this.cone.material.uniforms.uTime.value = clock;
+    this.cone.visible = this.cone.material.uniforms.uOpacity.value > 0.01;
     const d = this._t.distanceTo(this._s);
     const measuring = t >= 5.5;
     this.measure.set(this._s, this._t, windowed(t, 5.5, 6, 11.5, 12) * 0.9, clock);
@@ -143,11 +158,6 @@ export class ObstacleView extends View {
     this._head.y += 0.17;
     placeBubble(this.engine, this.bubble, this._head, t >= 10 && t < 16.5);
 
-    // caméra latérale qui accompagne la marche
-    const mid = (z + 1.95) / 2;
-    const drift = Math.sin(clock * 0.15) * 0.15;
-    this.camera.position.set(3.7 + drift, 2.05, mid - 2.3);
-    this.camera.lookAt(0, 1.1, mid + 0.05);
 
     // interface (jauge + chaîne de traitement)
     const below = measuring && d < this.threshold;

@@ -18,7 +18,29 @@ simples : aucun modèle 3D externe, aucun service payant, aucune clé d'API.
 | 9 | Avantages et limites | Capacités décrites sans exagération, perspectives |
 | 10 | Conclusion | Rappel des trois fonctions |
 
-## Lancer la présentation
+## Fichier unique (le plus simple)
+
+Dans `../telechargement/` :
+
+| Fichier | Usage |
+|---------|-------|
+| `SENSIA-presentation-3D.html` | **Fichier unique** : double-clic pour l'ouvrir. Three.js est chargé depuis le CDN jsDelivr (connexion Internet requise). Le code de l'application est intégré en clair et commenté. |
+| `SENSIA-presentation-3D-hors-ligne.html` | Même présentation, **sans Internet** (Three.js inclus, code minifié). À utiliser le jour de la soutenance si la salle n'a pas de réseau. |
+
+Ces deux fichiers sont générés à partir des sources par :
+
+```bash
+python3 tools/build.py      # depuis sensia/ ; la variante hors ligne nécessite Node.js (npx)
+```
+
+### Qualité graphique
+
+La qualité s'adapte automatiquement à l'ordinateur (résolution interne et
+anticrénelage baissent si l'animation passe sous ~30 images/s). On peut la forcer
+en ajoutant `?qualite=haute`, `?qualite=moyenne` ou `?qualite=basse` à l'adresse,
+par exemple `SENSIA-presentation-3D.html?qualite=haute#3`.
+
+## Lancer la version modulaire (développement)
 
 Les modules JavaScript doivent être servis par un serveur HTTP local
 (l'ouverture directe du fichier `index.html` est bloquée par les navigateurs).
@@ -49,6 +71,7 @@ Pour ouvrir directement une diapositive : <http://localhost:8000/#5>.
 | Voix on/off | bouton haut-parleur | S |
 | Aller à une étape | clic sur une étape de la liste | Entrée sur l'étape |
 | Tourner la vue éclatée | glisser sur le modèle (molette : zoom) | — |
+| Zoomer sur une pièce (vue éclatée) | clic sur la pièce dans la liste ; **Vue d'ensemble** pour revenir | Entrée sur la pièce |
 
 Les messages vocaux sont lus par la synthèse vocale du navigateur (voix française
 si elle est installée). Elle illustre le fichier audio que le DFPlayer Mini lirait
@@ -62,11 +85,13 @@ sensia/
 ├── css/style.css         mise en page 16:9 (1600 × 900, mise à l'échelle automatique)
 ├── js/
 │   ├── main.js           navigation, lecture/pause, clavier, plein écran
-│   ├── engine.js         renderer WebGL, bloom, étiquettes HTML projetées
-│   ├── util.js           interpolations, matériaux, textures générées
+│   ├── engine.js         renderer WebGL, studio d'éclairage (PMREM), post-traitement
+│   │                     (MSAA, bloom, vignette, grain), qualité adaptative, étiquettes
+│   ├── util.js           interpolations, matériaux PBR, textures procédurales (circuits imprimés…)
 │   ├── models/           glasses.js, person.js, modules.js, props.js, effects.js
 │   ├── scenes/           une vue 3D par diapositive (intro, exploded, obstacle, darkness, color, hero)
 │   └── ui/               hud.js (jauges, chaînes), synoptic.js (schéma SVG), speech.js
+├── tools/build.py        génère le fichier HTML unique (CDN) et la variante hors ligne
 ├── vendor/three/         Three.js r170 (licence MIT) et modules complémentaires utilisés
 └── assets/               photo du prototype (affichage de secours)
 ```
@@ -91,9 +116,28 @@ prototype ; les étapes restent animées et cliquables.
   fonctionnement prévu. SENSIA est une aide complémentaire et ne remplace ni la canne
   blanche ni les aides de mobilité habituelles.
 
+## Rendu visuel
+
+- **Matériaux PBR** : monture en titane graphite brossé (anisotropie + vernis), verres
+  teintés à transmission (réfraction, reflet irisé de traitement antireflet), circuits
+  imprimés procéduraux (vernis bleu/vert/noir, pistes de cuivre en relief, pastilles et
+  vias dorés, sérigraphie), acier brossé des transducteurs, plastiques laqués.
+- **Éclairage** : studio virtuel (boîtes à lumière + contre-jour cyan) converti en carte
+  d'environnement ; lumière principale douce à ombres adoucies, contre-jour cyan, débouchage bleu.
+- **Effets** : fronts d'onde ultrasonores (liseré, voile fresnel, ondulations), cône de mesure,
+  faisceaux volumétriques des LED avec taches au sol, faisceau étalonné et anneau de balayage
+  du TCS3200, flux de particules R/V/B, contours néon, poussière lumineuse.
+- **Post-traitement** : MSAA ×4, écrêtage HDR, bloom subtil, vignette, grain fin, légère
+  aberration chromatique.
+- **Interface** : verre dépoli (`backdrop-filter`), liserés en dégradé cyan → bleu, entrées en
+  cascade (courbe « expo »), travelling de caméra à chaque diapositive, vol de caméra vers
+  une pièce dans la vue éclatée.
+
 ## Tests effectués
 
-Testé dans Chromium (rendu logiciel SwiftShader) : navigation clavier et boutons,
-les 10 diapositives, rejeu et saut d'étape, éclatement / assemblage, choix d'objet,
-contrôle manuel de la lumière, redimensionnement (1600 × 900, 1280 × 720, 400 × 800),
-affichage de secours sans WebGL. Aucune erreur dans la console.
+Testé dans Chromium (rendu logiciel SwiftShader, sans carte graphique) : navigation clavier
+et boutons, les 10 diapositives, rejeu et saut d'étape, éclatement / assemblage, vol vers une
+pièce et retour, choix d'objet, contrôle manuel de la lumière, redimensionnement, fichier
+unique ouvert depuis le disque (versions CDN et hors ligne), affichage de secours sans WebGL.
+Aucune erreur dans la console. La fluidité n'a pas pu être mesurée sur une vraie carte
+graphique : vérifiez sur l'ordinateur de la soutenance.

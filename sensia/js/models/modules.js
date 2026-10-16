@@ -1,17 +1,28 @@
 // Modules électroniques du système (formes simplifiées, échelle indicative).
+// Circuits imprimés procéduraux, blindage métallique gravé, connecteurs dorés.
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { MAT, canvasTexture, cable } from '../util.js';
+import { MAT, canvasTexture, cable, pcbTextures, pcbMaterials, wireMaterial, brushedTex } from '../util.js';
 
-function labelTexture(text, { bg = '#0f1115', fg = '#d7dde6', w = 256, h = 64, font = 'bold 30px monospace' } = {}) {
+/** Texte gravé / imprimé sur une petite surface. */
+function labelTexture(lines, { bg = '#0f1115', fg = '#d7dde6', w = 256, h = 64, font = 'bold 30px monospace', brushed = false } = {}) {
   return canvasTexture(w, h, (g) => {
     g.fillStyle = bg;
     g.fillRect(0, 0, w, h);
+    if (brushed) {
+      for (let i = 0; i < 500; i++) {
+        g.fillStyle = `rgba(255,255,255,${Math.random() * 0.06})`;
+        g.fillRect(0, Math.random() * h, w, 1);
+      }
+    }
     g.fillStyle = fg;
-    g.font = font;
     g.textAlign = 'center';
     g.textBaseline = 'middle';
-    g.fillText(text, w / 2, h / 2);
+    const arr = Array.isArray(lines) ? lines : [lines];
+    arr.forEach((l, i) => {
+      g.font = i === 0 ? font : font.replace(/\d+px/, (m) => Math.round(parseInt(m, 10) * 0.6) + 'px');
+      g.fillText(l, w / 2, h / 2 + (i - (arr.length - 1) / 2) * h * 0.32);
+    });
   });
 }
 
@@ -27,23 +38,48 @@ function pinRow(n, pitch, mat) {
   return inst;
 }
 
-/** Carte ESP32 DevKit. */
+/** Carte ESP32 DevKit : module blindé gravé, antenne imprimée, boutons, USB. */
 export function createESP32() {
   const g = new THREE.Group();
   g.name = 'ESP32';
-  const pcb = new THREE.Mesh(new RoundedBoxGeometry(0.052, 0.0016, 0.028, 2, 0.0007), MAT.pcbBlack);
-  const shieldMat = new THREE.MeshStandardMaterial({ map: labelTexture('ESP32', { bg: '#c9ced6', fg: '#3b4250', font: 'bold 34px sans-serif' }), metalness: 0.9, roughness: 0.3 });
-  const shield = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.0028, 0.016), [MAT.steel, MAT.steel, shieldMat, MAT.steel, MAT.steel, MAT.steel]);
+  const pads = [];
+  for (let i = 0; i < 19; i++) {
+    pads.push([0.05 + i * 0.05, 0.06, 5], [0.05 + i * 0.05, 0.94, 5]);
+  }
+  const tex = pcbTextures({
+    w: 520, h: 280, seed: 41, mask: '#17191f', maskDark: '#0c0d11', copper: 'rgba(140,150,170,0.22)', pads,
+    text: [['ESP32 DevKit', 0.27, 0.5, 20], ['EN', 0.1, 0.78, 13], ['BOOT', 0.1, 0.22, 13], ['3V3  GND  5V', 0.55, 0.82, 11]],
+  });
+  const pcb = new THREE.Mesh(new THREE.BoxGeometry(0.052, 0.0016, 0.028), pcbMaterials(tex, '#0d0e12', 2));
+  const shieldTop = new THREE.MeshPhysicalMaterial({
+    map: labelTexture(['ESP32-WROOM', 'Wi-Fi · Bluetooth'], { bg: '#bfc5cd', fg: '#4a515e', font: 'bold 34px sans-serif', brushed: true, w: 256, h: 220 }),
+    metalness: 0.95, roughness: 0.28, roughnessMap: brushedTex, anisotropy: 0.6,
+  });
+  const shield = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.0028, 0.016), [MAT.steel, MAT.steel, shieldTop, MAT.steel, MAT.steel, MAT.steel]);
   shield.position.set(0.008, 0.0022, 0);
-  const antenna = new THREE.Mesh(new THREE.BoxGeometry(0.007, 0.0004, 0.016), new THREE.MeshStandardMaterial({ color: '#c9a74a', metalness: 0.8, roughness: 0.4 }));
-  antenna.position.set(0.0215, 0.001, 0);
-  const usb = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.003, 0.008), MAT.steel);
+  const module = new THREE.Mesh(new THREE.BoxGeometry(0.0255, 0.0008, 0.018), new THREE.MeshStandardMaterial({ color: '#141518', roughness: 0.5 }));
+  module.position.set(0.0115, 0.0012, 0);
+  // antenne imprimée en zigzag
+  const antenna = new THREE.Group();
+  for (let i = 0; i < 6; i++) {
+    const seg = new THREE.Mesh(new THREE.BoxGeometry(0.0005, 0.0002, 0.014), MAT.gold);
+    seg.position.set(0.0195 + i * 0.0009, 0.0018, 0);
+    antenna.add(seg);
+  }
+  const usb = new THREE.Mesh(new RoundedBoxGeometry(0.006, 0.003, 0.008, 2, 0.0007), MAT.steel);
   usb.position.set(-0.024, 0.0023, 0);
-  const chip = new THREE.Mesh(new THREE.BoxGeometry(0.005, 0.0012, 0.005), MAT.chip);
+  const chip = new THREE.Mesh(new RoundedBoxGeometry(0.005, 0.0012, 0.005, 2, 0.0002), MAT.chip);
   chip.position.set(-0.012, 0.0014, 0.004);
-  const ledBlue = new THREE.Mesh(new THREE.BoxGeometry(0.0016, 0.0008, 0.001), new THREE.MeshStandardMaterial({ color: '#4aa8ff', emissive: '#4aa8ff', emissiveIntensity: 2 }));
+  const ledBlue = new THREE.Mesh(new THREE.BoxGeometry(0.0016, 0.0008, 0.001), new THREE.MeshStandardMaterial({ color: '#4aa8ff', emissive: '#4aa8ff', emissiveIntensity: 3 }));
   ledBlue.position.set(-0.018, 0.0012, -0.008);
-  g.add(pcb, shield, antenna, usb, chip, ledBlue);
+  g.add(pcb, module, shield, antenna, usb, chip, ledBlue);
+  for (const z of [-0.0065, 0.0065]) {
+    const btn = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.0012, 0.003), MAT.steel);
+    btn.position.set(-0.0195, 0.0014, z);
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.0007, 0.0007, 0.0006, 12), MAT.plasticBlack);
+    cap.position.set(-0.0195, 0.0022, z);
+    g.add(btn, cap);
+  }
   for (const z of [-0.0125, 0.0125]) {
     const hdr = new THREE.Mesh(new THREE.BoxGeometry(0.048, 0.0025, 0.0025), MAT.plasticBlack);
     hdr.position.set(-0.001, -0.002, z);
@@ -59,10 +95,13 @@ export function createESP32() {
 export function createDFPlayer() {
   const g = new THREE.Group();
   g.name = 'DFPlayer Mini';
-  const pcb = new THREE.Mesh(new RoundedBoxGeometry(0.021, 0.0016, 0.021, 2, 0.0007), new THREE.MeshStandardMaterial({ color: '#1b1f27', roughness: 0.5 }));
-  const slot = new THREE.Mesh(new THREE.BoxGeometry(0.0125, 0.0018, 0.0125), MAT.steel);
+  const pads = [];
+  for (let i = 0; i < 8; i++) pads.push([0.06, 0.1 + i * 0.115, 6], [0.94, 0.1 + i * 0.115, 6]);
+  const tex = pcbTextures({ w: 256, h: 256, seed: 57, mask: '#1b2a58', maskDark: '#121c3d', copper: 'rgba(140,170,255,0.3)', pads, text: [['DFPlayer Mini', 0.5, 0.9, 19]] });
+  const pcb = new THREE.Mesh(new THREE.BoxGeometry(0.021, 0.0016, 0.021), pcbMaterials(tex, '#121c3d', 2));
+  const slot = new THREE.Mesh(new RoundedBoxGeometry(0.0125, 0.0018, 0.0125, 2, 0.0003), MAT.steel);
   slot.position.set(0, 0.0017, -0.002);
-  const chip = new THREE.Mesh(new THREE.BoxGeometry(0.0055, 0.0011, 0.0055), MAT.chip);
+  const chip = new THREE.Mesh(new RoundedBoxGeometry(0.0055, 0.0011, 0.0055, 2, 0.0002), MAT.chip);
   chip.position.set(0, -0.0013, 0.002);
   g.add(pcb, slot, chip);
   for (const x of [-0.0095, 0.0095]) {
@@ -78,8 +117,24 @@ export function createDFPlayer() {
 export function createSDCard() {
   const g = new THREE.Group();
   g.name = 'Carte mémoire';
-  const tex = labelTexture('microSD', { bg: '#1e4fd1', fg: '#ffffff', w: 128, h: 128, font: 'bold 26px sans-serif' });
-  const top = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.4 });
+  const tex = canvasTexture(128, 176, (c, w, h) => {
+    const grd = c.createLinearGradient(0, 0, w, h);
+    grd.addColorStop(0, '#2a6cf0');
+    grd.addColorStop(1, '#173f9e');
+    c.fillStyle = grd;
+    c.fillRect(0, 0, w, h);
+    c.fillStyle = 'rgba(255,255,255,0.12)';
+    c.fillRect(0, h * 0.55, w, h * 0.12);
+    c.fillStyle = '#ffffff';
+    c.textAlign = 'center';
+    c.font = 'bold 22px sans-serif';
+    c.fillText('micro', w / 2, h * 0.32);
+    c.font = 'bold 34px sans-serif';
+    c.fillText('SD', w / 2, h * 0.47);
+    c.font = '600 14px sans-serif';
+    c.fillText('AUDIO', w / 2, h * 0.8);
+  });
+  const top = new THREE.MeshPhysicalMaterial({ map: tex, roughness: 0.35, clearcoat: 0.6 });
   const body = new THREE.Mesh(new THREE.BoxGeometry(0.011, 0.0008, 0.015), [MAT.plasticBlack, MAT.plasticBlack, top, MAT.plasticBlack, MAT.plasticBlack, MAT.plasticBlack]);
   g.add(body);
   for (let i = 0; i < 8; i++) {
@@ -90,52 +145,78 @@ export function createSDCard() {
   return g;
 }
 
-/** Batterie rechargeable (cellule cylindrique dans un support). */
+/** Batterie rechargeable : cellule Li-ion gainée dans un support. */
 export function createBattery() {
   const g = new THREE.Group();
   g.name = 'Batterie';
-  const holder = new THREE.Mesh(new RoundedBoxGeometry(0.075, 0.012, 0.022, 3, 0.003), MAT.plasticBlack);
-  const wrap = new THREE.MeshPhysicalMaterial({ color: '#e07a22', roughness: 0.35, clearcoat: 0.8 });
-  const cell = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.065, 32), wrap);
+  const holder = new THREE.Mesh(new RoundedBoxGeometry(0.075, 0.012, 0.022, 4, 0.003), MAT.plasticBlack);
+  const wrapTex = canvasTexture(512, 128, (c, w, h) => {
+    const grd = c.createLinearGradient(0, 0, 0, h);
+    grd.addColorStop(0, '#f28a2b');
+    grd.addColorStop(0.5, '#e06d16');
+    grd.addColorStop(1, '#b8540c');
+    c.fillStyle = grd;
+    c.fillRect(0, 0, w, h);
+    c.fillStyle = '#16181d';
+    c.fillRect(w * 0.62, 0, w * 0.16, h);
+    c.fillStyle = 'rgba(255,255,255,0.92)';
+    c.font = 'bold 34px sans-serif';
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText('Li-ion', w * 0.3, h * 0.42);
+    c.font = '600 18px sans-serif';
+    c.fillText('RECHARGEABLE', w * 0.3, h * 0.72);
+  });
+  const wrap = new THREE.MeshPhysicalMaterial({ map: wrapTex, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.08 });
+  const cell = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.065, 64, 1, true), wrap);
   cell.rotation.z = Math.PI / 2;
   cell.position.y = 0.007;
-  const band = new THREE.Mesh(new THREE.CylinderGeometry(0.0092, 0.0092, 0.012, 32), new THREE.MeshStandardMaterial({ color: '#16181d', roughness: 0.5 }));
-  band.rotation.z = Math.PI / 2;
-  band.position.set(0.012, 0.007, 0);
-  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.002, 20), MAT.steel);
-  cap.rotation.z = Math.PI / 2;
-  cap.position.set(0.0335, 0.007, 0);
-  g.add(holder, cell, band, cap);
-  const red = new THREE.MeshStandardMaterial({ color: '#d42a2a', roughness: 0.6 });
-  const blk = new THREE.MeshStandardMaterial({ color: '#111', roughness: 0.6 });
-  g.add(cable([[-0.037, 0.002, 0.004], [-0.05, 0.0, 0.006], [-0.06, -0.004, 0.01]], 0.0009, red, 12));
-  g.add(cable([[-0.037, 0.002, -0.004], [-0.05, 0.0, -0.006], [-0.06, -0.004, -0.01]], 0.0009, blk, 12));
+  for (const sx of [-1, 1]) {
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.0088, 0.0088, 0.0012, 48), MAT.steel);
+    cap.rotation.z = Math.PI / 2;
+    cap.position.set(sx * 0.033, 0.007, 0);
+    g.add(cap);
+  }
+  const nub = new THREE.Mesh(new THREE.CylinderGeometry(0.0035, 0.0035, 0.0018, 24), MAT.steel);
+  nub.rotation.z = Math.PI / 2;
+  nub.position.set(0.0345, 0.007, 0);
+  for (const sx of [-1, 1]) {
+    const spring = new THREE.Mesh(new THREE.TorusGeometry(0.004, 0.0006, 8, 24), MAT.steel);
+    spring.rotation.y = Math.PI / 2;
+    spring.position.set(sx * 0.0365, 0.007, 0);
+    g.add(spring);
+  }
+  g.add(holder, cell, nub);
+  g.add(cable([[-0.037, 0.002, 0.004], [-0.05, 0.0, 0.006], [-0.06, -0.004, 0.01]], 0.0009, wireMaterial('#d42a2a'), 16));
+  g.add(cable([[-0.037, 0.002, -0.004], [-0.05, 0.0, -0.006], [-0.06, -0.004, -0.01]], 0.0009, wireMaterial('#15171b'), 16));
   return g;
 }
 
-/** Paire d'écouteurs (vue technique). */
+/** Paire d'écouteurs intra-auriculaires (vue technique). */
 export function createEarphones() {
   const g = new THREE.Group();
   g.name = 'Écouteurs';
-  const mat = new THREE.MeshPhysicalMaterial({ color: '#1d222b', roughness: 0.3, clearcoat: 1 });
-  const ringMat = new THREE.MeshBasicMaterial({ color: '#2ee6f0', toneMapped: false });
-  const cm = new THREE.MeshStandardMaterial({ color: '#20242c', roughness: 0.6 });
+  const mat = new THREE.MeshPhysicalMaterial({ color: '#1b2029', roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.05, metalness: 0.2 });
+  const tipMat = new THREE.MeshPhysicalMaterial({ color: '#5a6372', roughness: 0.75, sheen: 1, sheenColor: '#9fb3c8' });
+  const ringMat = new THREE.MeshBasicMaterial({ color: new THREE.Color('#2ee6f0').multiplyScalar(1.4), toneMapped: false });
+  const cm = wireMaterial('#20242c');
   for (const sx of [-1, 1]) {
     const bud = new THREE.Group();
     bud.position.set(sx * 0.018, 0.012, 0);
-    const shell = new THREE.Mesh(new THREE.SphereGeometry(0.0085, 24, 16), mat);
-    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.0055, 16, 12), new THREE.MeshStandardMaterial({ color: '#4b5361', roughness: 0.8 }));
+    const shell = new THREE.Mesh(new THREE.SphereGeometry(0.0085, 40, 24), mat);
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.0055, 24, 16), tipMat);
     tip.position.x = sx * 0.007;
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.006, 0.001, 8, 24), ringMat);
+    tip.scale.set(0.8, 1, 1);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.006, 0.0008, 10, 40), ringMat);
     ring.rotation.y = Math.PI / 2;
-    ring.position.x = -sx * 0.006;
-    const stem = new THREE.Mesh(new THREE.CapsuleGeometry(0.0026, 0.012, 4, 8), mat);
+    ring.position.x = -sx * 0.0062;
+    const stem = new THREE.Mesh(new THREE.CapsuleGeometry(0.0026, 0.012, 6, 12), mat);
     stem.position.y = -0.011;
     bud.add(shell, tip, ring, stem);
     g.add(bud);
-    g.add(cable([[sx * 0.018, -0.002, 0], [sx * 0.014, -0.018, 0.002], [sx * 0.004, -0.03, 0], [0, -0.036, 0]], 0.0008, cm, 16));
+    g.add(cable([[sx * 0.018, -0.002, 0], [sx * 0.014, -0.018, 0.002], [sx * 0.004, -0.03, 0], [0, -0.036, 0]], 0.0008, cm, 24));
   }
-  g.add(cable([[0, -0.036, 0], [0, -0.05, 0.004], [0.004, -0.065, 0]], 0.001, cm, 12));
+  g.add(cable([[0, -0.036, 0], [0, -0.05, 0.004], [0.004, -0.065, 0]], 0.001, cm, 16));
   return g;
 }
 
@@ -144,15 +225,15 @@ export function createBeltBox() {
   const g = new THREE.Group();
   g.name = 'Boîtier';
   const shell = new THREE.Mesh(
-    new RoundedBoxGeometry(0.06, 0.1, 0.035, 4, 0.012),
-    new THREE.MeshPhysicalMaterial({ color: '#202734', roughness: 0.45, clearcoat: 0.6 })
+    new RoundedBoxGeometry(0.06, 0.1, 0.035, 5, 0.013),
+    new THREE.MeshPhysicalMaterial({ color: '#2a313d', metalness: 0.7, roughness: 0.34, roughnessMap: brushedTex, clearcoat: 0.5, clearcoatRoughness: 0.2 })
   );
   shell.castShadow = true;
-  const strip = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.07, 0.001), new THREE.MeshBasicMaterial({ color: '#2ee6f0', toneMapped: false }));
+  const strip = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.07, 0.001), new THREE.MeshBasicMaterial({ color: new THREE.Color('#2ee6f0').multiplyScalar(1.5), toneMapped: false }));
   strip.position.set(-0.018, 0, 0.018);
   const logo = new THREE.Mesh(
     new THREE.PlaneGeometry(0.04, 0.01),
-    new THREE.MeshBasicMaterial({ map: labelTexture('SENSIA', { bg: '#202734', fg: '#9fb3c8', font: 'bold 34px sans-serif' }) })
+    new THREE.MeshBasicMaterial({ map: labelTexture('SENSIA', { bg: '#2a313d', fg: '#a9bdd2', font: 'bold 34px sans-serif' }) })
   );
   logo.position.set(0.006, 0.03, 0.0178);
   g.add(shell, strip, logo);

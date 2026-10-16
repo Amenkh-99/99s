@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import { View } from './base.js';
 import { createGlasses } from '../models/glasses.js';
-import { SonarPulses, dustField } from '../models/effects.js';
+import { SonarPulses, dustField, makeBeam } from '../models/effects.js';
 import { windowed } from '../util.js';
 
 export class HeroView extends View {
@@ -10,7 +10,7 @@ export class HeroView extends View {
     super(app);
     this.duration = 12;
     this.loop = true;
-    this.bloom = { strength: 0.6, radius: 0.55, threshold: 0.85 };
+    this.bloom = { strength: 0.65, radius: 0.55, threshold: 1.0 };
   }
 
   build() {
@@ -41,7 +41,11 @@ export class HeroView extends View {
     ring2.scale.setScalar(0.7);
     ring2.material = ring.material.clone();
     ring2.material.opacity = 0.25;
-    scene.add(ring, ring2);
+    const top = makeBeam('#9fd0ff', 4, 1.0, new THREE.Vector3(0, -1, 0));
+    top.position.y = 3.4;
+    top.material.uniforms.uOpacity.value = 0.06;
+    top.onBeforeRender = () => (top.material.uniforms.uTime.value = performance.now() / 1000);
+    scene.add(ring, ring2, top);
     this.dust = dustField(400, [6, 3, 6]);
     this.dust.position.y = -1.2;
     scene.add(this.dust);
@@ -49,8 +53,6 @@ export class HeroView extends View {
     this.sonar = new SonarPulses(scene, { start: 0.5, interval: 1.2, speed: 0.9, count: 10, echo: false });
     this.sonar.gain = 0.3;
     this.target = new THREE.Vector3();
-    this.camera.position.set(0, 0.12, 2.05);
-    this.camera.lookAt(0, -0.02, 0);
   }
 
   enter() {
@@ -60,7 +62,11 @@ export class HeroView extends View {
     this.engine.fitCamera(this.camera);
   }
 
-  update(t, dt, clock) {
+  update(t, dt, clock, realDt = dt) {
+    // caméra recalculée à chaque image (compatible avec le travelling d'entrée)
+    this.camera.position.set(Math.sin(clock * 0.1) * 0.12, 0.12, 2.05);
+    this.camera.lookAt(0, -0.02, 0);
+    this.applyEntrance(realDt);
     this.pivot.rotation.y = Math.sin(clock * 0.35) * 0.65;
     this.pivot.rotation.x = 0.08 + Math.sin(clock * 0.5) * 0.04;
     this.pivot.position.y = Math.sin(clock * 0.9) * 0.03;

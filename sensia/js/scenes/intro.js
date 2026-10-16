@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { View } from './base.js';
 import { createStage, createChair, createCardboardBox, createPlant } from '../models/props.js';
 import { createPerson } from '../models/person.js';
-import { dustField } from '../models/effects.js';
+import { dustField, makeBeam } from '../models/effects.js';
 import { smooth, lerp, easeInOut, windowed } from '../util.js';
 
 export class IntroView extends View {
@@ -34,7 +34,12 @@ export class IntroView extends View {
     const plant = createPlant();
     plant.position.set(1.4, 0, 3.4);
     this.dust = dustField(300, [8, 3, 8]);
-    scene.add(chair, box, plant, this.dust);
+    // douche de lumière zénithale sur le personnage (ambiance studio)
+    const top = makeBeam('#9fd0ff', 4.6, 1.05, new THREE.Vector3(0, -1, 0));
+    top.position.y = 4.6;
+    top.material.uniforms.uOpacity.value = 0.06;
+    top.onBeforeRender = () => (top.material.uniforms.uTime.value = performance.now() / 1000);
+    scene.add(chair, box, plant, this.dust, top);
 
     // Caméra "subjective" (œil de la personne) pour l'encart
     this.eyeCam = new THREE.PerspectiveCamera(62, 380 / 220, 0.05, 30);
@@ -72,7 +77,7 @@ export class IntroView extends View {
     this.app.subjectiveEl.hidden = !on;
   }
 
-  update(t, dt, clock) {
+  update(t, dt, clock, realDt = dt) {
     const p = this.person;
     // respiration et léger mouvement de tête
     p.body.position.y = Math.sin(clock * 1.6) * 0.003;
@@ -92,6 +97,7 @@ export class IntroView extends View {
     this.target.set(0, lerp(wide.ty, close.ty, s), lerp(0, 0.06, s));
     this.camera.position.set(Math.sin(az) * r, h, Math.cos(az) * r);
     this.camera.lookAt(this.target);
+    this.applyEntrance(realDt);
 
     const lv = windowed(t, 9, 10, 20.3, 21);
     this.partLabels.forEach((l, i) => (l.opacity = windowed(t, 9 + i * 0.35, 10 + i * 0.35, 20.3, 21) * lv));

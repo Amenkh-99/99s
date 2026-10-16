@@ -127,7 +127,11 @@ async function boot(): Promise<void> {
     if (!to) return;
     director.go(to, mode);
     shell.update(to, SCENES, nav);
-    history.replaceState(null, '', `#/${to.scene + 1}/${to.step + 1}`);
+    try {
+      history.replaceState(null, '', `#/${to.scene + 1}/${to.step + 1}`);
+    } catch {
+      /* cadre restreint : l'adresse n'est simplement pas mise à jour */
+    }
     broadcast();
   }
   function next(): void {
@@ -165,8 +169,13 @@ async function boot(): Promise<void> {
       applyQuality();
       shell.toast(quality === 'low' ? 'Qualité réduite : rendu allégé' : 'Qualité standard');
     },
-    presenter: () => window.open('./presenter.html', 'motrix-presenter', 'width=1100,height=760'),
+    presenter: () => openPresenter(),
   });
+
+  function openPresenter(): void {
+    const w = window.open('./presenter.html', 'motrix-presenter', 'width=1100,height=760');
+    if (!w) shell.toast('Vue présentateur bloquée par le navigateur : utilisez N pour les notes');
+  }
 
   function toggleFullscreen(): void {
     if (document.fullscreenElement) void document.exitFullscreen();
@@ -199,7 +208,7 @@ async function boot(): Promise<void> {
     else if (k === 'g' || k === 'G') shell.openDialog('menu');
     else if (k === 'h' || k === 'H' || k === '?') shell.openDialog('help');
     else if (k === 'n' || k === 'N') shell.toggleNotes();
-    else if (k === 'v' || k === 'V') window.open('./presenter.html', 'motrix-presenter', 'width=1100,height=760');
+    else if (k === 'v' || k === 'V') openPresenter();
     else if (k === 'r' || k === 'R') shell.trigger('reduced');
     else if (k === 'q' || k === 'Q') shell.trigger('quality');
     else if (k === 'p' || k === 'P') shell.togglePerf();

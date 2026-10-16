@@ -665,3 +665,14 @@ button {
     animation-duration: 0.2s;
   }
 }
+
+/* ───────── enregistrement vidéo : aucune interface de contrôle ───────── */
+.video-mode .hud,
+.video-mode .toast,
+.video-mode .perf {
+  display: none !important;
+}
+.video-mode,
+.video-mode * {
+  cursor: none !important;
+}

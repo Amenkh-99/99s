@@ -49,7 +49,8 @@ async function boot(): Promise<void> {
   const shell: Shell = buildShell(app, SCENES);
   let world: World;
   try {
-    world = new World(shell.canvas);
+    // ?noaa : sans anticrénelage matériel (enregistrement vidéo en rendu logiciel)
+    world = new World(shell.canvas, !new URLSearchParams(location.search).has('noaa'));
   } catch (err) {
     shell.fatal(
       "WebGL n'est pas disponible. Dans Chrome, activez « Utiliser l'accélération graphique » (Paramètres → Système), puis rechargez la page.",
@@ -64,8 +65,11 @@ async function boot(): Promise<void> {
 
   // ── préférences (?test : mode de test automatisé, sans dégradation automatique ni intro)
   const params = new URLSearchParams(location.search);
-  const testMode = params.has('test');
+  // ?video : enregistrement vidéo (pas de barre de contrôle, intro conservée)
+  const videoMode = params.has('video');
+  const testMode = params.has('test') || videoMode;
   if (testMode && params.has('pr')) world.pixelRatioOverride = Number(params.get('pr'));
+  document.documentElement.classList.toggle('video-mode', videoMode);
   const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
   let reducedMotion = prefs.get<boolean>('reducedMotion', mq.matches);
   let quality: Quality = prefs.get<Quality>('quality', 'high');
@@ -231,7 +235,7 @@ async function boot(): Promise<void> {
   director.go(start, 'instant');
   shell.update(start, SCENES, nav);
   world.warmup();
-  const intro = { p: reducedMotion || testMode || start.scene !== 0 ? 1 : 0 };
+  const intro = { p: reducedMotion || (testMode && !videoMode) || start.scene !== 0 ? 1 : 0 };
   world.lightIntro(intro.p);
   if (intro.p < 1) gsap.to(intro, { p: 1, duration: 3.2, ease: 'power2.inOut', onUpdate: () => world.lightIntro(intro.p) });
   shell.ready();

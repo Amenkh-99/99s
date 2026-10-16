@@ -42,6 +42,19 @@ Cette commande produit `dist-single\MOTRIX-presentation.html` (environ 1,4 Mo). 
 - On peut l'envoyer tel quel par e-mail ou par messagerie.
 - La vue présentateur (V) n'y est pas disponible ; les notes (N) le sont.
 
+### Vidéo MP4
+
+```bat
+npm run build:single
+npm run video
+```
+
+Ces commandes enregistrent toute la présentation, image par image, dans `dist-video\MOTRIX-presentation.mp4`.
+
+- **Format :** 1920 × 1080, 24 images/s, environ 3 min 50, sans son.
+- **Prérequis :** `ffmpeg` (avec libx264) doit être installé et accessible dans le PATH.
+- **Durée de rendu :** le temps de chaque étape est réglé dans `scripts/record-video.mjs` (tableau `HOLDS`). L'enregistrement est plus lent que le temps réel sur un ordinateur sans carte graphique.
+
 > La version standard (`dist\index.html`) ne s'ouvre pas d'un double-clic : les navigateurs bloquent les modules JavaScript externes en `file://`. Utilisez le serveur local, ou la version fichier unique ci-dessus. Le serveur local `scripts/serve.mjs` n'utilise aucune dépendance, aucun service externe et aucun réseau.
 
 ---

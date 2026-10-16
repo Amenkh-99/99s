@@ -18,8 +18,10 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const arg = (k, d) => process.argv.find((a) => a.startsWith(`--${k}=`))?.split('=')[1] ?? d;
 const FPS = Number(arg('fps', 24));
 const LIMIT = Number(arg('limit', 1e9));
-const PR = arg('pr', '0.75');
+const PR = arg('pr', '0.667');
 const QUALITY = arg('quality', 'high');
+// 1280 × 720 (dsf 1) par défaut ; --dsf=1.5 pour du 1920 × 1080 (plus lent)
+const DSF = Number(arg('dsf', 1));
 const OUT = arg('out', fileURLToPath(new URL('../dist-video/MOTRIX-presentation.mp4', import.meta.url)));
 const FILE = fileURLToPath(new URL('../dist-single/MOTRIX-presentation.html', import.meta.url));
 
@@ -73,8 +75,8 @@ const browser = await chromium.launch({
   channel: process.env.MOTRIX_E2E_CHANNEL || undefined,
   args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--hide-scrollbars'],
 });
-// fenêtre 1280 × 720 rendue à ×1,5 : images 1920 × 1080 avec un texte net
-const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1.5 });
+// fenêtre 1280 × 720 ; à ×1,5 on obtient des images 1920 × 1080
+const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: DSF });
 await ctx.addInitScript((quality) => {
   try {
     localStorage.setItem('motrix.quality', JSON.stringify(quality));

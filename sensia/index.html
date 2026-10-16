@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SENSIA Lunettes Intelligentes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Présentation technique interactive en 3D de SENSIA, lunettes intelligentes d'aide aux personnes malvoyantes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{ "imports": { "three": "./vendor/three/three.module.min.js", "three/addons/": "./vendor/three/addons/" } }
+</script>
+</head>
+<body>
+<!--BODY-->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></symbol>
+    <symbol id="i-restart" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4v4h4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-obstacle" viewBox="0 0 24 24"><rect x="11" y="9" width="10" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 9.5a5 5 0 0 1 0 5M5.5 7.5a8 8 0 0 1 0 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-color" viewBox="0 0 24 24"><circle cx="12" cy="13" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 6c0-2 1-3 2.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4l9 16H3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v4.5M12 17.2v.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-cane" viewBox="0 0 24 24"><path d="M9 3.5h3a2 2 0 0 1 2 2V21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 16.5v4.5" stroke="currentColor" stroke-width="3"/></symbol>
+    <symbol id="i-dog" viewBox="0 0 24 24"><path d="M5 11l2-4 2 2h5l3-3 2 2-2 3v7h-2l-1-4H9l-1 4H6v-6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-glasses" viewBox="0 0 24 24"><path d="M2.5 10h19M4 10l.8 5.2a2 2 0 0 0 2 1.8h2.4a2 2 0 0 0 2-1.6L11.5 12h1l.3 3.4a2 2 0 0 0 2 1.6h2.4a2 2 0 0 0 2-1.8L20 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<div id="viewport">
+<div id="stage" aria-live="polite">
+
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark"><use href="#i-glasses"/></svg>
+      <span class="brand-name">SENSIA</span>
+    </div>
+    <div class="topbar-title"><span id="slide-num">01</span><span id="slide-title">Présentation de SENSIA</span></div>
+    <div class="topbar-meta">Mini-projet · L3 EI2 · 2026/2027</div>
+  </header>
+
+  <div id="canvas-area">
+    <canvas id="gl" aria-label="Animation 3D de SENSIA"></canvas>
+    <div id="subjective" hidden>
+      <span>Perception réduite de l'environnement <small>(illustration)</small></span>
+    </div>
+    <div id="labels"></div>
+    <div id="fallback" hidden>
+      <img src="assets/prototype-sensia.jpg" alt="Photo du prototype SENSIA : lunettes avec capteur à ultrasons au centre et fils de connexion">
+      <p>L'animation 3D n'est pas disponible sur cet appareil (WebGL non pris en charge). Les étapes restent animées et cliquables.</p>
+    </div>
+  </div>
+
+  <main id="slides">
+
+    <!-- 1 ─ Présentation -->
+    <section class="slide" data-view="intro" data-area="full" data-title="Présentation de SENSIA">
+      <div class="panel panel-intro">
+        <p class="eyebrow">Mini-projet · Électricité industrielle</p>
+        <h1 class="display">SENSIA</h1>
+        <p class="lead">Des lunettes intelligentes qui aident une personne malvoyante à se déplacer et à reconnaître les couleurs.</p>
+        <ul class="fn-list">
+          <li><svg><use href="#i-obstacle"/></svg><span><b>Obstacle</b> détecté → message vocal</span></li>
+          <li><svg><use href="#i-moon"/></svg><span><b>Obscurité</b> détectée → deux LED allumées</span></li>
+          <li><svg><use href="#i-color"/></svg><span><b>Couleur</b> d'un objet → annonce vocale</span></li>
+        </ul>
+        <div class="credits">
+          <div><span>Réalisé par</span>Mohamed Mokhtar Mannai · Rawen Taboubi</div>
+          <div><span>Encadré par</span>Mounira Ayadi</div>
+          <div><span>Département</span>Électrique · Classe L3 EI2 · 2026/2027</div>
+        </div>
+        <div class="row">
+          <button class="chip-btn" id="toggle-subjective" aria-pressed="true">Vision réduite : affichée</button>
+        </div>
+        <p class="note">SENSIA ne rend pas la vue. C'est une aide complémentaire à la canne blanche.</p>
+      </div>
+    </section>
+
+    <!-- 2 ─ Problématique -->
+    <section class="slide" data-view="hero" data-area="right" data-title="Problématique">
+      <div class="panel">
+        <h2 class="h2">Problématique</h2>
+        <p class="body">Une personne malvoyante peut avoir des difficultés pour :</p>
+        <div class="cards">
+          <div class="card"><svg><use href="#i-obstacle"/></svg><div><b>Détecter les obstacles</b><span>situés devant elle et estimer leur position.</span></div></div>
+          <div class="card"><svg><use href="#i-color"/></svg><div><b>Reconnaître la couleur</b><span>d'un objet : vêtement, fruit, emballage…</span></div></div>
+          <div class="card"><svg><use href="#i-moon"/></svg><div><b>Se déplacer quand il fait sombre</b><span>avec une luminosité faible ou variable.</span></div></div>
+        </div>
+        <p class="eyebrow mt">Solutions possibles</p>
+        <div class="solutions">
+          <div><svg><use href="#i-cane"/></svg>Canne blanche</div>
+          <div><svg><use href="#i-dog"/></svg>Chien guide</div>
+          <div class="pick"><svg><use href="#i-glasses"/></svg>SENSIA<small>en complément</small></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 ─ Vue éclatée -->
+    <section class="slide" data-view="exploded" data-area="right" data-title="Vue éclatée 3D">
+      <div class="panel">
+        <h2 class="h2">Vue éclatée 3D</h2>
+        <ol class="legend" id="legend">
+          <li data-i="0"><i>1</i><div><b>HC-SR04</b><span>mesure la distance d'un obstacle</span></div></li>
+          <li data-i="1"><i>2</i><div><b>TCS3200</b><span>mesure la lumière réfléchie pour identifier la couleur</span></div></li>
+          <li data-i="2"><i>3</i><div><b>Bouton poussoir</b><span>déclenche la demande de lecture de couleur</span></div></li>
+          <li data-i="3"><i>4</i><div><b>LDR</b><span>détecte le niveau de luminosité</span></div></li>
+          <li data-i="4"><i>5</i><div><b>Deux LED</b><span>éclairage d'appoint aux deux extrémités</span></div></li>
+          <li data-i="5"><i>6</i><div><b>ESP32</b><span>traite les données et commande le système</span></div></li>
+          <li data-i="6"><i>7</i><div><b>DFPlayer Mini</b><span>lit les messages vocaux enregistrés</span></div></li>
+          <li data-i="7"><i>8</i><div><b>Carte mémoire</b><span>stocke les fichiers audio</span></div></li>
+          <li data-i="8"><i>9</i><div><b>Écouteurs</b><span>diffusent les messages vocaux</span></div></li>
+          <li data-i="9"><i>10</i><div><b>Batterie rechargeable</b><span>alimente le système</span></div></li>
+        </ol>
+        <div class="row">
+          <button class="chip-btn" data-explode="open">Éclater</button>
+          <button class="chip-btn" data-explode="closed">Assembler</button>
+          <button class="chip-btn" data-explode="auto" aria-pressed="true">Automatique</button>
+        </div>
+        <p class="note">Modèle illustratif : formes simplifiées et positions conceptuelles, pas un montage validé. Faites glisser pour tourner le modèle.</p>
+      </div>
+    </section>
+
+    <!-- 4 ─ Schéma synoptique -->
+    <section class="slide" data-view="synoptic" data-area="none" data-title="Schéma synoptique">
+      <div class="panel">
+        <h2 class="h2">Schéma synoptique</h2>
+        <ul class="chains">
+          <li class="chain" data-chain="A" data-t="0"><b>HC-SR04 → ESP32 → DFPlayer Mini → Écouteurs</b><span>Détection d'obstacle et avertissement vocal</span><q>Attention, il y a un obstacle devant vous.</q></li>
+          <li class="chain" data-chain="B" data-t="5"><b>Bouton → ESP32 · TCS3200 → ESP32 → DFPlayer Mini → Écouteurs</b><span>Demande puis annonce de la couleur</span><q>La couleur de l'objet est rouge.</q></li>
+          <li class="chain" data-chain="C" data-t="10.5"><b>LDR → ESP32 → Deux LED</b><span>Allumage des LED quand la luminosité est insuffisante</span></li>
+          <li class="chain" data-chain="P" data-t="15"><b>Batterie → composants</b><span>Alimentation du système</span></li>
+        </ul>
+        <div class="key">
+          <span><i class="k-data"></i>Flux de données</span>
+          <span><i class="k-power"></i>Alimentation électrique</span>
+        </div>
+        <div class="row"><button class="chip-btn" id="syn-all" aria-pressed="false">Afficher tous les flux</button></div>
+      </div>
+      <div class="synoptic-wrap">
+        <svg viewBox="0 0 1000 660" class="synoptic" role="img" aria-label="Schéma synoptique de SENSIA">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="arrow-head"/></marker>
+            <marker id="arr-p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="arrow-head-p"/></marker>
+          </defs>
+          <!-- alimentation -->
+          <path id="pw1" class="flow power" d="M500 560 V 392" marker-end="url(#arr-p)"/>
+          <path id="pw2" class="flow power" d="M600 600 H 985 V 140 H 968" marker-end="url(#arr-p)"/>
+          <path id="pw3" class="flow power" d="M400 600 H 18 V 80 H 34" marker-end="url(#arr-p)"/>
+          <path class="tap power" d="M18 210 H 34 M18 340 H 34 M18 470 H 34"/>
+          <path id="pw4" class="tap power" d="M985 470 H 968"/>
+          <!-- données -->
+          <path id="p-hc" class="flow" d="M240 80 C 320 80, 320 235, 396 235" marker-end="url(#arr)"/>
+          <path id="p-btn" class="flow" d="M240 210 C 320 210, 320 268, 396 268" marker-end="url(#arr)"/>
+          <path id="p-tcs" class="flow" d="M240 340 C 320 340, 320 302, 396 302" marker-end="url(#arr)"/>
+          <path id="p-ldr" class="flow" d="M240 470 C 320 470, 320 336, 396 336" marker-end="url(#arr)"/>
+          <path id="p-esp-df" class="flow" d="M604 245 C 680 245, 680 120, 736 120" marker-end="url(#arr)"/>
+          <path id="p-df-ear" class="flow" d="M852 184 V 266" marker-end="url(#arr)"/>
+          <path id="p-esp-led" class="flow" d="M604 340 C 680 340, 680 470, 736 470" marker-end="url(#arr)"/>
+          <g id="dots"></g>
+          <!-- blocs -->
+          <g class="node" data-n="hc"><rect x="40" y="44" width="200" height="72" rx="14"/><text x="140" y="76" class="n-t">HC-SR04</text><text x="140" y="100" class="n-s">distance</text></g>
+          <g class="node" data-n="btn"><rect x="40" y="174" width="200" height="72" rx="14"/><text x="140" y="206" class="n-t">Bouton poussoir</text><text x="140" y="230" class="n-s">demande de couleur</text></g>
+          <g class="node" data-n="tcs"><rect x="40" y="304" width="200" height="72" rx="14"/><text x="140" y="336" class="n-t">TCS3200</text><text x="140" y="360" class="n-s">couleur</text></g>
+          <g class="node" data-n="ldr"><rect x="40" y="434" width="200" height="72" rx="14"/><text x="140" y="466" class="n-t">LDR</text><text x="140" y="490" class="n-s">luminosité</text></g>
+          <g class="node core" data-n="esp"><rect x="400" y="196" width="200" height="192" rx="18"/><text x="500" y="280" class="n-t big">ESP32</text><text x="500" y="310" class="n-s">traitement</text><text x="500" y="332" class="n-s">et commande</text></g>
+          <g class="node" data-n="df"><rect x="740" y="80" width="224" height="100" rx="14"/><text x="852" y="118" class="n-t">DFPlayer Mini</text><text x="852" y="142" class="n-s">lecture audio</text><text x="852" y="164" class="n-s">+ carte mémoire</text></g>
+          <g class="node" data-n="ear"><rect x="740" y="270" width="224" height="72" rx="14"/><text x="852" y="302" class="n-t">Écouteurs</text><text x="852" y="326" class="n-s">message vocal</text></g>
+          <g class="node" data-n="led"><rect x="740" y="434" width="224" height="72" rx="14"/><text x="852" y="466" class="n-t">Deux LED</text><text x="852" y="490" class="n-s">éclairage d'appoint</text></g>
+          <g class="node power-node" data-n="bat"><rect x="400" y="562" width="200" height="76" rx="14"/><text x="500" y="595" class="n-t">Batterie</text><text x="500" y="619" class="n-s">rechargeable</text></g>
+        </svg>
+        <p class="note syn-note">Les broches, tensions et le câblage détaillé figurent dans le schéma de câblage du projet ; ils ne sont pas représentés ici.</p>
+      </div>
+    </section>
+
+    <!-- 5 ─ Obstacle -->
+    <section class="slide" data-view="obstacle" data-area="right" data-title="Fonction 1 · Détection des obstacles">
+      <div class="panel">
+        <h2 class="h2"><svg class="h-ic"><use href="#i-obstacle"/></svg>Détection des obstacles</h2>
+        <ol class="steps">
+          <li data-t="0">La personne avance avec les lunettes.</li>
+          <li data-t="1.5">Un obstacle se trouve devant elle.</li>
+          <li data-t="3">Le HC-SR04 émet des ondes ultrasonores.</li>
+          <li data-t="4.2">Les ondes atteignent l'obstacle et reviennent (écho).</li>
+          <li data-t="5.5">La distance est mesurée.</li>
+          <li data-t="6.8">L'ESP32 reçoit et traite la mesure.</li>
+          <li data-t="8">Distance inférieure au seuil : l'ESP32 déclenche le DFPlayer Mini.</li>
+          <li data-t="9.2">Le DFPlayer lit le fichier audio de la carte mémoire.</li>
+          <li data-t="10">Le message est diffusé dans les écouteurs.</li>
+          <li data-t="12.5">La personne s'arrête et change prudemment de direction.</li>
+        </ol>
+        <div class="row"><button class="chip-btn replay">Rejouer l'animation</button></div>
+        <p class="note">Seuil de distance réglable dans le programme. Aide supplémentaire : elle ne remplace pas la canne blanche ni les aides habituelles.</p>
+      </div>
+      <div class="hud hud-top">
+        <div class="pipe">
+          <div class="pnode" data-node="hc"><small>capteur</small>HC-SR04</div><i class="parrow"></i>
+          <div class="pnode" data-node="esp"><small>traitement</small>ESP32</div><i class="parrow"></i>
+          <div class="pnode" data-node="df"><small>audio</small>DFPlayer Mini</div><i class="parrow"></i>
+          <div class="pnode" data-node="sd"><small>fichier</small>Carte mémoire</div><i class="parrow"></i>
+          <div class="pnode" data-node="ear"><small>sortie</small>Écouteurs</div>
+        </div>
+      </div>
+      <div class="hud hud-bottom-left">
+        <div class="gauge">
+          <div class="gauge-head"><span>Distance mesurée</span><em data-gauge-state>En attente de mesure</em></div>
+          <div class="gauge-track"><div class="gauge-fill" data-gauge-fill></div><div class="gauge-mark" data-gauge-mark><span>seuil réglable</span></div></div>
+          <div class="gauge-scale"><span>proche</span><span>loin</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 ─ Obscurité -->
+    <section class="slide" data-view="darkness" data-area="right" data-title="Fonction 2 · Détection de l'obscurité">
+      <div class="panel">
+        <h2 class="h2"><svg class="h-ic"><use href="#i-moon"/></svg>Détection de l'obscurité</h2>
+        <ol class="steps">
+          <li data-t="0">L'environnement est bien éclairé.</li>
+          <li data-t="2">La luminosité baisse progressivement.</li>
+          <li data-t="3">La LDR détecte la diminution de la lumière.</li>
+          <li data-t="4">La valeur mesurée diminue sur la jauge.</li>
+          <li data-t="4.8">L'ESP32 compare la mesure au seuil configuré.</li>
+          <li data-t="5.5">Les deux LED aux extrémités s'allument automatiquement.</li>
+          <li data-t="7.5">Leur lumière éclaire la zone devant la personne.</li>
+          <li data-t="12">La lumière revient : les LED s'éteignent selon le programme.</li>
+        </ol>
+        <div class="manual">
+          <label class="switch"><input type="checkbox" id="manual-light"><span>Contrôle manuel de la lumière</span></label>
+          <input type="range" id="light-level" min="0" max="100" value="100" aria-label="Luminosité ambiante" disabled>
+        </div>
+        <div class="row"><button class="chip-btn replay">Rejouer l'animation</button></div>
+        <p class="note">La LDR fournit une mesure liée à la luminosité. Le seuil dépend du montage et du programme ; le circuit de commande des LED doit être adapté à leur courant.</p>
+      </div>
+      <div class="hud hud-top">
+        <div class="pipe">
+          <div class="pnode" data-node="ldr"><small>capteur</small>LDR</div><i class="parrow"></i>
+          <div class="pnode" data-node="esp"><small>comparaison au seuil</small>ESP32</div><i class="parrow"></i>
+          <div class="pnode" data-node="leds"><small>sortie</small>Deux LED</div>
+        </div>
+      </div>
+      <div class="hud hud-bottom-left">
+        <div class="gauge">
+          <div class="gauge-head"><span>Luminosité mesurée (LDR)</span><em data-gauge-state>Luminosité suffisante</em></div>
+          <div class="gauge-track light"><div class="gauge-fill" data-gauge-fill></div><div class="gauge-mark" data-gauge-mark><span>seuil configuré</span></div></div>
+          <div class="gauge-scale"><span>sombre</span><span>lumineux</span></div>
+        </div>
+        <div class="led-pills"><span class="led-pill">LED gauche</span><span class="led-pill">LED droite</span></div>
+      </div>
+      <div class="hud-msg">« Lorsque la luminosité devient insuffisante, la LDR détecte l'obscurité et l'ESP32 allume automatiquement les deux LED. »</div>
+    </section>
+
+    <!-- 7 ─ Couleur -->
+    <section class="slide" data-view="color" data-area="right" data-title="Fonction 3 · Identification de la couleur">
+      <div class="panel">
+        <h2 class="h2"><svg class="h-ic"><use href="#i-color"/></svg>Identification de la couleur</h2>
+        <ol class="steps">
+          <li data-t="0">La personne tient l'objet devant elle.</li>
+          <li data-t="1.8">Le TCS3200 est orienté vers l'objet.</li>
+          <li data-t="3">L'objet est mis en évidence.</li>
+          <li data-t="4.5">La personne appuie sur le bouton poussoir.</li>
+          <li data-t="5.2">Le bouton s'enfonce : « Bouton activé ».</li>
+          <li data-t="6">Le TCS3200 mesure la lumière réfléchie par l'objet.</li>
+          <li data-t="7.4">L'ESP32 traite les valeurs et détermine la couleur.</li>
+          <li data-t="9.5">Le DFPlayer Mini lit le fichier audio de cette couleur.</li>
+          <li data-t="11">Les écouteurs diffusent le message vocal.</li>
+        </ol>
+        <div class="row" role="group" aria-label="Objet à identifier">
+          <button class="chip-btn obj" data-obj="rouge" aria-pressed="true"><i class="sw red"></i>Pomme rouge</button>
+          <button class="chip-btn obj" data-obj="bleu" aria-pressed="false"><i class="sw blue"></i>Cube bleu</button>
+          <button class="chip-btn replay">Rejouer</button>
+        </div>
+        <p class="note">Le TCS3200 fournit des mesures que le programme interprète. Le résultat dépend de l'éclairage, de la distance, du calibrage et de l'algorithme, et suppose que le fichier audio existe sur la carte mémoire.</p>
+      </div>
+      <div class="hud hud-top">
+        <div class="pipe">
+          <div class="pnode" data-node="btn"><small>demande</small>Bouton</div><i class="parrow"></i>
+          <div class="pnode" data-node="tcs"><small>capteur</small>TCS3200</div><i class="parrow"></i>
+          <div class="pnode" data-node="esp"><small>traitement</small>ESP32</div><i class="parrow"></i>
+          <div class="pnode" data-node="df"><small>audio</small>DFPlayer Mini</div><i class="parrow"></i>
+          <div class="pnode" data-node="ear"><small>sortie</small>Écouteurs</div>
+        </div>
+      </div>
+      <div class="badge-press"><svg><use href="#i-check"/></svg>Bouton activé</div>
+      <div class="hud hud-bottom-right">
+        <div class="rgb">
+          <div class="rgb-head">Mesures du TCS3200 <small>valeurs illustratives</small></div>
+          <div class="rgb-bars">
+            <div><div class="bar-track"><div class="bar r" data-bar></div></div><span>R</span></div>
+            <div><div class="bar-track"><div class="bar g" data-bar></div></div><span>V</span></div>
+            <div><div class="bar-track"><div class="bar b" data-bar></div></div><span>B</span></div>
+          </div>
+          <div class="result"><span>Couleur déterminée par le programme</span><b data-result>—</b></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 ─ Architecture électronique -->
+    <section class="slide" data-area="none" data-title="Architecture électronique">
+      <div class="arch">
+        <h2 class="h2">Architecture électronique</h2>
+        <div class="arch-grid">
+          <div class="arch-col">
+            <p class="eyebrow">Capteurs · entrées</p>
+            <div class="mod"><b>HC-SR04</b><span>Mesure la distance d'un obstacle par ultrasons. Portée plus stable qu'un capteur infrarouge classique.</span></div>
+            <div class="mod"><b>TCS3200</b><span>Mesure la lumière réfléchie par un objet. Plus simple, léger et économique qu'une caméra.</span></div>
+            <div class="mod"><b>LDR</b><span>Photorésistance : sa mesure varie avec la luminosité ambiante.</span></div>
+            <div class="mod"><b>Bouton poussoir</b><span>Permet à l'utilisateur de demander la lecture de couleur.</span></div>
+          </div>
+          <div class="arch-col core">
+            <p class="eyebrow">Traitement</p>
+            <div class="mod big"><b>ESP32</b><span>Lit les capteurs, compare les mesures aux seuils du programme et commande les sorties. Choisi à la place d'un Arduino pour sa vitesse de calcul et sa mémoire ; Wi-Fi et Bluetooth intégrés.</span></div>
+            <p class="eyebrow mt">Alimentation</p>
+            <div class="mod power"><b>Batterie rechargeable</b><span>Alimente l'ensemble du système.</span></div>
+          </div>
+          <div class="arch-col">
+            <p class="eyebrow">Sorties</p>
+            <div class="mod"><b>DFPlayer Mini</b><span>Lit les messages vocaux enregistrés en fichiers audio.</span></div>
+            <div class="mod"><b>Carte mémoire</b><span>Stocke les fichiers audio : alerte d'obstacle et nom de chaque couleur.</span></div>
+            <div class="mod"><b>Écouteurs</b><span>Diffusent les messages vocaux, plus compréhensibles qu'un simple buzzer.</span></div>
+            <div class="mod"><b>Deux LED</b><span>Éclairage d'appoint aux deux extrémités de la monture.</span></div>
+          </div>
+        </div>
+        <div class="tools">
+          <span class="eyebrow">Outils</span>
+          <span><b>Arduino IDE</b> programmation de l'ESP32</span>
+          <span><b>Bibliothèques Arduino</b> capteurs et audio</span>
+          <span><b>Fritzing</b> schéma de câblage</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 ─ Avantages et limites -->
+    <section class="slide" data-area="none" data-title="Avantages et limites">
+      <div class="pros-cons">
+        <h2 class="h2">Avantages et limites</h2>
+        <div class="pc-grid">
+          <div class="pc pros">
+            <p class="eyebrow"><svg><use href="#i-check"/></svg>Avantages</p>
+            <ul>
+              <li>Trois aides réunies sur une seule monture : obstacles, obscurité, couleurs.</li>
+              <li>Messages vocaux clairs, diffusés dans les écouteurs.</li>
+              <li>Éclairage automatique, sans action de l'utilisateur.</li>
+              <li>Lecture de couleur à la demande, par un simple bouton.</li>
+              <li>Composants accessibles et peu coûteux, programmés avec Arduino IDE.</li>
+            </ul>
+          </div>
+          <div class="pc cons">
+            <p class="eyebrow"><svg><use href="#i-warn"/></svg>Limites</p>
+            <ul>
+              <li>Le HC-SR04 mesure devant lui : un obstacle bas, fin ou sur le côté peut lui échapper.</li>
+              <li>La couleur reconnue dépend de l'éclairage, de la distance et du calibrage.</li>
+              <li>Les seuils de distance et de luminosité doivent être réglés et testés.</li>
+              <li>Autonomie limitée par la batterie ; câbles et boîtier encore encombrants.</li>
+              <li>SENSIA ne rend pas la vue et ne remplace ni la canne blanche ni le chien guide.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="next-steps">
+          <p class="eyebrow">Perspectives</p>
+          <p>Intégrer l'électronique dans la monture et réduire les câbles · tester au moins cinq couleurs · régler les seuils par des essais réels · faire évoluer le prototype vers le PFE.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 ─ Conclusion -->
+    <section class="slide" data-view="hero" data-area="full" data-title="Conclusion">
+      <div class="panel panel-intro">
+        <h2 class="h2">Conclusion</h2>
+        <p class="lead">SENSIA combine la détection des obstacles avec une alerte vocale, l'éclairage automatique dans l'obscurité et l'identification de la couleur d'un objet à la demande.</p>
+        <p class="body">Ce mini-projet met en pratique l'utilisation de capteurs, d'une carte ESP32 et d'un système audio pour contribuer à l'autonomie des personnes malvoyantes.</p>
+        <ul class="fn-list">
+          <li><svg><use href="#i-obstacle"/></svg><span><b>HC-SR04</b> → « Attention, il y a un obstacle devant vous. »</span></li>
+          <li><svg><use href="#i-moon"/></svg><span><b>LDR</b> → deux LED allumées</span></li>
+          <li><svg><use href="#i-color"/></svg><span><b>TCS3200</b> → « La couleur de l'objet est rouge. »</span></li>
+        </ul>
+        <p class="thanks">Merci pour votre attention.<span>Des questions ?</span></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="controls">
+    <div class="progress" aria-hidden="true"><div class="progress-fill" id="anim-progress"></div></div>
+    <div class="ctrl-group">
+      <button class="ctrl" id="btn-prev" title="Précédent (←)" aria-label="Diapositive précédente"><svg><use href="#i-prev"/></svg><span>Précédent</span></button>
+      <button class="ctrl primary" id="btn-play" title="Lecture / Pause (Espace)" aria-label="Lecture ou pause"><svg><use href="#i-pause"/></svg><span>Pause</span></button>
+      <button class="ctrl" id="btn-restart" title="Recommencer (R)" aria-label="Recommencer l'animation"><svg><use href="#i-restart"/></svg><span>Recommencer</span></button>
+      <button class="ctrl" id="btn-next" title="Suivant (→)" aria-label="Diapositive suivante"><span>Suivant</span><svg><use href="#i-next"/></svg></button>
+    </div>
+    <div class="dots" id="dots-nav" role="tablist" aria-label="Diapositives"></div>
+    <div class="ctrl-group">
+      <button class="ctrl icon" id="btn-sound" title="Voix (S)" aria-label="Activer ou couper la voix" aria-pressed="true"><svg><use href="#i-sound"/></svg></button>
+      <button class="ctrl icon" id="btn-full" title="Plein écran (F)" aria-label="Plein écran"><svg><use href="#i-full"/></svg></button>
+    </div>
+  </footer>
+</div>
+<p class="rotate-hint">Tournez l'écran à l'horizontale pour agrandir la présentation.</p>
+</div>
+<script type="module" src="js/main.js"></script>
+<!--/BODY-->
+</body>
+</html>

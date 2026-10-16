@@ -30,7 +30,19 @@ Ouvrez ensuite `http://127.0.0.1:4173/` dans Chrome et appuyez sur **F** pour pa
 
 Pour le développement (rechargement automatique) : `npm run dev`, puis `http://127.0.0.1:5173/`.
 
-> La page ne s'ouvre pas en double-cliquant sur `dist\index.html` : les navigateurs bloquent les modules JavaScript en `file://`. Le serveur local `scripts/serve.mjs` n'utilise aucune dépendance, aucun service externe et aucun réseau.
+### Version fichier unique (à envoyer ou ouvrir d'un double-clic)
+
+```bat
+npm run build:single
+```
+
+Cette commande produit `dist-single\MOTRIX-presentation.html` (environ 1,4 Mo). Le code, les styles, les polices et le logo sont intégrés au fichier.
+
+- Le fichier s'ouvre d'un double-clic dans Chrome, sans serveur ni connexion.
+- On peut l'envoyer tel quel par e-mail ou par messagerie.
+- La vue présentateur (V) n'y est pas disponible ; les notes (N) le sont.
+
+> La version standard (`dist\index.html`) ne s'ouvre pas d'un double-clic : les navigateurs bloquent les modules JavaScript externes en `file://`. Utilisez le serveur local, ou la version fichier unique ci-dessus. Le serveur local `scripts/serve.mjs` n'utilise aucune dépendance, aucun service externe et aucun réseau.
 
 ---
 

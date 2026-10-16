@@ -173,6 +173,11 @@ async function boot(): Promise<void> {
   });
 
   function openPresenter(): void {
+    // la version « fichier unique » ne contient pas la page présentateur
+    if (import.meta.env.MODE === 'single') {
+      shell.toast('Vue présentateur indisponible dans la version fichier unique : utilisez N pour les notes');
+      return;
+    }
     const w = window.open('./presenter.html', 'motrix-presenter', 'width=1100,height=760');
     if (!w) shell.toast('Vue présentateur bloquée par le navigateur : utilisez N pour les notes');
   }

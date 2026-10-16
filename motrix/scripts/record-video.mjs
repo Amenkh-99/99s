@@ -116,6 +116,15 @@ async function recordScene(s) {
       const run = queue;
       queue = [];
       for (const [, cb] of run) cb(t);
+      // Les animations et transitions CSS suivent elles aussi l'horloge
+      // virtuelle : chacune est mise en pause à sa création puis positionnée.
+      for (const a of document.getAnimations()) {
+        if (a.__v === undefined) {
+          a.__v = t - ms;
+          a.pause();
+        }
+        a.currentTime = t - a.__v;
+      }
     };
   }, QUALITY);
   const page = await ctx.newPage();
@@ -127,38 +136,18 @@ async function recordScene(s) {
   await page.goto(`${pathToFileURL(FILE).href}?video&pr=${PR}${hash}`);
   await page.waitForFunction(() => !!window.__motrix && !!window.__advance, null, { timeout: 60000 });
 
-  // Les transitions CSS suivent le temps réel : on les ralentit pour qu'elles
-  // durent le même nombre d'images qu'à vitesse normale.
-  const cdp = await ctx.newCDPSession(page);
-  await cdp.send('Animation.enable');
-  let rate = 0.03;
-  await cdp.send('Animation.setPlaybackRate', { playbackRate: rate });
-
   // préchauffage non enregistré
   for (let i = 0; i < (s === 0 ? 3 : 24); i++) await page.evaluate((ms) => window.__advance(ms), s === 0 ? 1 : frameMs);
 
   const seconds = HOLDS[s].reduce((a, b) => a + b, 0);
   const part = `${segPath(s)}.part`;
   const enc = encoder(part, seconds, s === 0, s === HOLDS.length - 1);
-  let windowStart = Date.now();
-  let windowFrames = 0;
   for (let k = 0; k < HOLDS[s].length; k++) {
     if (s > 0 || k > 0) await page.evaluate(() => window.__motrix.next());
     const count = Math.round(HOLDS[s][k] * FPS);
     for (let i = 0; i < count; i++) {
       await page.evaluate((ms) => window.__advance(ms), frameMs);
       await enc.write(await page.screenshot({ type: 'jpeg', quality: 92, timeout: 120000 }));
-      // ajuste la vitesse des animations CSS au rythme réel de capture
-      if (++windowFrames === 12) {
-        const realPerFrame = (Date.now() - windowStart) / windowFrames;
-        const next = Math.min(1, Math.max(0.01, frameMs / realPerFrame));
-        if (Math.abs(next - rate) / rate > 0.15) {
-          rate = next;
-          await cdp.send('Animation.setPlaybackRate', { playbackRate: rate });
-        }
-        windowStart = Date.now();
-        windowFrames = 0;
-      }
     }
   }
   enc.end();

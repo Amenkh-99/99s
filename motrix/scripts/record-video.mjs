@@ -5,19 +5,21 @@
  * présentation, quelle que soit la vitesse de l'ordinateur.
  *
  *   npm run build:single
- *   node scripts/record-video.mjs [--fps=24] [--limit=secondes] [--out=chemin.mp4]
+ *   node scripts/record-video.mjs [--fps=24] [--out=chemin.mp4]
+ *
+ * L'enregistrement se fait scène par scène dans dist-video/segments/ : s'il est
+ * interrompu, une nouvelle exécution reprend à la première scène manquante.
  *
  * Prérequis : Playwright (Chromium) et ffmpeg avec libx264.
  */
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
-import { mkdir, stat } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { mkdir, rename, stat, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const arg = (k, d) => process.argv.find((a) => a.startsWith(`--${k}=`))?.split('=')[1] ?? d;
 const FPS = Number(arg('fps', 24));
-const LIMIT = Number(arg('limit', 1e9));
 const PR = arg('pr', '0.667');
 const QUALITY = arg('quality', 'high');
 // 1280 × 720 (dsf 1) par défaut ; --dsf=1.5 pour du 1920 × 1080 (plus lent)
@@ -51,120 +53,138 @@ await stat(FILE).catch(() => {
   console.error('Fichier unique absent : lancez d’abord « npm run build:single ».');
   process.exit(1);
 });
-await mkdir(dirname(OUT), { recursive: true });
+const SEG_DIR = join(dirname(OUT), 'segments');
+await mkdir(SEG_DIR, { recursive: true });
 
-// Les images sont envoyées directement à ffmpeg (aucun fichier intermédiaire).
-const plannedFrames = Math.round(Math.min(total, LIMIT) * FPS);
-const dur = plannedFrames / FPS;
-const ffmpeg = spawn(
-  'ffmpeg',
-  [
-    '-y', '-loglevel', 'error',
-    '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
-    '-vf', `fade=t=in:st=0:d=0.8,fade=t=out:st=${Math.max(0, dur - 1.2).toFixed(2)}:d=1.2,format=yuv420p`,
-    '-c:v', 'libx264', '-preset', 'slow', '-crf', '20', '-profile:v', 'high',
-    '-movflags', '+faststart',
-    OUT,
-  ],
-  { stdio: ['pipe', 'inherit', 'inherit'] },
-);
-const ffmpegDone = new Promise((res) => ffmpeg.on('close', res));
-const write = (buf) => new Promise((res) => (ffmpeg.stdin.write(buf) ? res() : ffmpeg.stdin.once('drain', res)));
+const frameMs = 1000 / FPS;
+const t0 = Date.now();
+const segPath = (s) => join(SEG_DIR, `scene-${String(s + 1).padStart(2, '0')}.mp4`);
+const exists = (p) => stat(p).then(() => true, () => false);
+
+function encoder(file, seconds, fadeIn, fadeOut) {
+  const filters = [];
+  if (fadeIn) filters.push('fade=t=in:st=0:d=0.8');
+  if (fadeOut) filters.push(`fade=t=out:st=${Math.max(0, seconds - 1.2).toFixed(2)}:d=1.2`);
+  filters.push('format=yuv420p');
+  const ff = spawn(
+    'ffmpeg',
+    [
+      '-y', '-loglevel', 'error',
+      '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
+      '-vf', filters.join(','),
+      '-c:v', 'libx264', '-preset', 'slow', '-crf', '20', '-profile:v', 'high', '-g', String(FPS * 2),
+      '-f', 'mp4', file,
+    ],
+    { stdio: ['pipe', 'inherit', 'inherit'] },
+  );
+  return {
+    done: new Promise((res) => ff.on('close', res)),
+    write: (buf) => new Promise((res) => (ff.stdin.write(buf) ? res() : ff.stdin.once('drain', res))),
+    end: () => ff.stdin.end(),
+  };
+}
 
 const browser = await chromium.launch({
   channel: process.env.MOTRIX_E2E_CHANNEL || undefined,
   args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--hide-scrollbars'],
 });
-// fenêtre 1280 × 720 ; à ×1,5 on obtient des images 1920 × 1080
-const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: DSF });
-await ctx.addInitScript((quality) => {
-  try {
-    localStorage.setItem('motrix.quality', JSON.stringify(quality));
-    localStorage.setItem('motrix.reducedMotion', 'false');
-  } catch {}
-  // horloge virtuelle : le temps n'avance qu'avec window.__advance(ms)
-  let t = 0;
-  const base = Date.now();
-  performance.now = () => t;
-  Date.now = () => base + t;
-  let queue = [];
-  let id = 0;
-  window.requestAnimationFrame = (cb) => {
-    queue.push([++id, cb]);
-    return id;
-  };
-  window.cancelAnimationFrame = (i) => {
-    queue = queue.filter(([j]) => j !== i);
-  };
-  window.__advance = (ms) => {
-    t += ms;
-    const run = queue;
-    queue = [];
-    for (const [, cb] of run) cb(t);
-  };
-}, QUALITY);
 
-const page = await ctx.newPage();
-const errors = [];
-page.on('pageerror', (e) => errors.push(e.message));
-await page.goto(`${pathToFileURL(FILE).href}?video&pr=${PR}`);
-await page.waitForFunction(() => !!window.__motrix && !!window.__advance, null, { timeout: 60000 });
+async function recordScene(s) {
+  // nouveau contexte par scène : horloge virtuelle et état neufs
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: DSF });
+  await ctx.addInitScript((quality) => {
+    try {
+      localStorage.setItem('motrix.quality', JSON.stringify(quality));
+      localStorage.setItem('motrix.reducedMotion', 'false');
+    } catch {}
+    // horloge virtuelle : le temps n'avance qu'avec window.__advance(ms)
+    let t = 0;
+    const base = Date.now();
+    performance.now = () => t;
+    Date.now = () => base + t;
+    let queue = [];
+    let id = 0;
+    window.requestAnimationFrame = (cb) => {
+      queue.push([++id, cb]);
+      return id;
+    };
+    window.cancelAnimationFrame = (i) => {
+      queue = queue.filter(([j]) => j !== i);
+    };
+    window.__advance = (ms) => {
+      t += ms;
+      const run = queue;
+      queue = [];
+      for (const [, cb] of run) cb(t);
+    };
+  }, QUALITY);
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  // scène 1 : démarrage normal (intro lumineuse) ; sinon on part de la
+  // dernière étape de la scène précédente pour enregistrer la vraie transition
+  const hash = s === 0 ? '' : `#/${s}/${HOLDS[s - 1].length}`;
+  await page.goto(`${pathToFileURL(FILE).href}?video&pr=${PR}${hash}`);
+  await page.waitForFunction(() => !!window.__motrix && !!window.__advance, null, { timeout: 60000 });
 
-// Les transitions CSS suivent le temps réel : on les ralentit pour qu'elles
-// durent le même nombre d'images qu'à vitesse normale.
-const cdp = await ctx.newCDPSession(page);
-await cdp.send('Animation.enable');
-let rate = 0.2;
-await cdp.send('Animation.setPlaybackRate', { playbackRate: rate });
+  // Les transitions CSS suivent le temps réel : on les ralentit pour qu'elles
+  // durent le même nombre d'images qu'à vitesse normale.
+  const cdp = await ctx.newCDPSession(page);
+  await cdp.send('Animation.enable');
+  let rate = 0.03;
+  await cdp.send('Animation.setPlaybackRate', { playbackRate: rate });
 
-const frameMs = 1000 / FPS;
-let n = 0;
-const t0 = Date.now();
-let lastReport = t0;
-let windowStart = Date.now();
-let windowFrames = 0;
+  // préchauffage non enregistré
+  for (let i = 0; i < (s === 0 ? 3 : 24); i++) await page.evaluate((ms) => window.__advance(ms), s === 0 ? 1 : frameMs);
 
-async function capture(seconds) {
-  const count = Math.round(seconds * FPS);
-  for (let i = 0; i < count && n < plannedFrames; i++) {
-    await page.evaluate((ms) => window.__advance(ms), frameMs);
-    await write(await page.screenshot({ type: 'jpeg', quality: 92, timeout: 120000 }));
-    n++;
-    windowFrames++;
-    // ajuste la vitesse des animations CSS au rythme réel de capture
-    if (windowFrames === 12) {
-      const realPerFrame = (Date.now() - windowStart) / windowFrames;
-      const next = Math.min(1, Math.max(0.02, frameMs / realPerFrame));
-      if (Math.abs(next - rate) / rate > 0.15) {
-        rate = next;
-        await cdp.send('Animation.setPlaybackRate', { playbackRate: rate });
+  const seconds = HOLDS[s].reduce((a, b) => a + b, 0);
+  const part = `${segPath(s)}.part`;
+  const enc = encoder(part, seconds, s === 0, s === HOLDS.length - 1);
+  let windowStart = Date.now();
+  let windowFrames = 0;
+  for (let k = 0; k < HOLDS[s].length; k++) {
+    if (s > 0 || k > 0) await page.evaluate(() => window.__motrix.next());
+    const count = Math.round(HOLDS[s][k] * FPS);
+    for (let i = 0; i < count; i++) {
+      await page.evaluate((ms) => window.__advance(ms), frameMs);
+      await enc.write(await page.screenshot({ type: 'jpeg', quality: 92, timeout: 120000 }));
+      // ajuste la vitesse des animations CSS au rythme réel de capture
+      if (++windowFrames === 12) {
+        const realPerFrame = (Date.now() - windowStart) / windowFrames;
+        const next = Math.min(1, Math.max(0.01, frameMs / realPerFrame));
+        if (Math.abs(next - rate) / rate > 0.15) {
+          rate = next;
+          await cdp.send('Animation.setPlaybackRate', { playbackRate: rate });
+        }
+        windowStart = Date.now();
+        windowFrames = 0;
       }
-      windowStart = Date.now();
-      windowFrames = 0;
-    }
-    if (Date.now() - lastReport > 30000) {
-      lastReport = Date.now();
-      const done = n / FPS;
-      const eta = ((Date.now() - t0) / n) * (plannedFrames - n);
-      console.log(`${done.toFixed(1)} s enregistrées — reste ≈ ${Math.round(eta / 60000)} min`);
     }
   }
+  enc.end();
+  const code = await enc.done;
+  await ctx.close();
+  if (code !== 0) throw new Error(`ffmpeg a échoué (scène ${s + 1})`);
+  await rename(part, segPath(s));
+  if (errors.length) console.warn(`Scène ${s + 1} : erreurs de page`, errors.slice(0, 3));
 }
 
-// quelques images de préchauffage (compilation, intro) non enregistrées
-for (let i = 0; i < 3; i++) await page.evaluate((ms) => window.__advance(ms), 1);
-
-for (let s = 0; s < HOLDS.length && n < plannedFrames; s++) {
-  for (let k = 0; k < HOLDS[s].length && n < plannedFrames; k++) {
-    if (s > 0 || k > 0) await page.evaluate(() => window.__motrix.next());
-    await capture(HOLDS[s][k]);
+for (let s = 0; s < HOLDS.length; s++) {
+  if (await exists(segPath(s))) {
+    console.log(`Scène ${s + 1}/${HOLDS.length} déjà enregistrée`);
+    continue;
   }
+  const t = Date.now();
+  await recordScene(s);
+  console.log(`Scène ${s + 1}/${HOLDS.length} enregistrée (${HOLDS[s].reduce((a, b) => a + b, 0)} s de vidéo) en ${Math.round((Date.now() - t) / 60000)} min`);
 }
 await browser.close();
-if (errors.length) console.warn('Erreurs de page :', errors.slice(0, 3));
 
-ffmpeg.stdin.end();
-const code = await ffmpegDone;
+// assemblage sans réencodage
+const list = join(SEG_DIR, 'liste.txt');
+await writeFile(list, HOLDS.map((_, s) => `file '${segPath(s).replace(/'/g, "'\\''")}'`).join('\n') + '\n');
+const cat = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', list, '-c', 'copy', '-movflags', '+faststart', OUT], { stdio: 'inherit' });
+const code = await new Promise((res) => cat.on('close', res));
 if (code !== 0) process.exit(code ?? 1);
 const size = (await stat(OUT)).size / 1024 / 1024;
-console.log(`Vidéo : ${OUT} — ${n} images, ${(n / FPS).toFixed(1)} s, ${size.toFixed(1)} Mo, en ${Math.round((Date.now() - t0) / 60000)} min`);
+console.log(`Vidéo : ${OUT} — ${total.toFixed(1)} s, ${size.toFixed(1)} Mo (session : ${Math.round((Date.now() - t0) / 60000)} min)`);

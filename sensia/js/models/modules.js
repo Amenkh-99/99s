@@ -239,3 +239,174 @@ export function createBeltBox() {
   g.add(shell, strip, logo);
   return g;
 }
+
+// ─── Composants supplémentaires (diapositive « Étude du matériel ») ─────────
+
+/** Résistance traversante : corps beige, anneaux de couleur, pattes en acier. */
+export function createResistor(bands = ['#d42a2a', '#d42a2a', '#7a4a1e', '#d8b25a']) {
+  const g = new THREE.Group();
+  g.name = 'Résistance';
+  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.0012, 0.0045, 8, 24), new THREE.MeshPhysicalMaterial({ color: '#e3c9a0', roughness: 0.4, clearcoat: 0.6 }));
+  body.rotation.z = Math.PI / 2;
+  g.add(body);
+  bands.forEach((c, i) => {
+    const b = new THREE.Mesh(new THREE.CylinderGeometry(0.00125, 0.00125, 0.0005, 24), new THREE.MeshPhysicalMaterial({ color: c, roughness: 0.35, clearcoat: 0.6 }));
+    b.rotation.z = Math.PI / 2;
+    b.position.x = -0.0018 + i * 0.0011 + (i === 3 ? 0.0006 : 0);
+    g.add(b);
+  });
+  for (const sx of [-1, 1]) {
+    const leg = cable([[sx * 0.0032, 0, 0], [sx * 0.006, 0, 0], [sx * 0.0068, -0.0012, 0], [sx * 0.0068, -0.009, 0]], 0.00022, MAT.steel, 16);
+    g.add(leg);
+  }
+  return g;
+}
+
+/** Faisceau de fils de prototypage (jumpers) avec connecteurs Dupont. */
+export function createJumperWires() {
+  const g = new THREE.Group();
+  g.name = 'Fils électriques';
+  const cols = ['#e8871e', '#1aa58a', '#d42a2a', '#3d7bff', '#e3c21b', '#15171b'];
+  cols.forEach((c, i) => {
+    const a = (i / cols.length) * Math.PI * 2;
+    const r = 0.012 + (i % 2) * 0.004;
+    const pts = [];
+    for (let k = 0; k <= 8; k++) {
+      const t = k / 8;
+      pts.push([Math.cos(a + t * 2.6) * r * (0.6 + t * 0.5), Math.sin(t * Math.PI) * 0.006 + i * 0.0007, Math.sin(a + t * 2.6) * r * (0.6 + t * 0.5)]);
+    }
+    g.add(cable(pts, 0.00045, wireMaterial(c), 64));
+    for (const end of [pts[0], pts[pts.length - 1]]) {
+      const plug = new THREE.Mesh(new RoundedBoxGeometry(0.0026, 0.0026, 0.007, 2, 0.0004), MAT.plasticBlack);
+      plug.position.set(...end);
+      plug.lookAt(0, end[1], 0);
+      const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.00025, 0.00025, 0.004, 8), MAT.gold);
+      pin.rotation.x = Math.PI / 2;
+      pin.position.z = 0.005;
+      plug.add(pin);
+      g.add(plug);
+    }
+  });
+  return g;
+}
+
+/** Module LDR (carte bleue, photorésistance, potentiomètre de réglage, comparateur). */
+export function createLDRModule() {
+  const g = new THREE.Group();
+  g.name = 'Module LDR';
+  const tex = pcbTextures({
+    w: 512, h: 220, seed: 71, mask: '#1f55c9', maskDark: '#163f9c', copper: 'rgba(120,170,255,0.35)',
+    pads: [[0.9, 0.3, 7], [0.9, 0.5, 7], [0.9, 0.7, 7]],
+    text: [['VCC GND DO AO', 0.62, 0.86, 15], ['LM393', 0.55, 0.25, 15]],
+  });
+  const pcb = new THREE.Mesh(new THREE.BoxGeometry(0.032, 0.0016, 0.014), pcbMaterials(tex, '#123a8e', 2));
+  g.add(pcb);
+  // potentiomètre bleu avec vis
+  const pot = new THREE.Mesh(new RoundedBoxGeometry(0.0065, 0.004, 0.0065, 2, 0.0008), new THREE.MeshPhysicalMaterial({ color: '#2f6fe0', roughness: 0.35, clearcoat: 0.6 }));
+  pot.position.set(-0.002, 0.0028, 0);
+  const screw = new THREE.Mesh(new THREE.CylinderGeometry(0.0016, 0.0016, 0.0008, 24), MAT.steel);
+  screw.position.set(-0.002, 0.0049, 0);
+  const slot = new THREE.Mesh(new THREE.BoxGeometry(0.0026, 0.0003, 0.0004), MAT.chip);
+  slot.position.set(-0.002, 0.0054, 0);
+  const ic = new THREE.Mesh(new RoundedBoxGeometry(0.005, 0.0012, 0.004, 2, 0.0002), MAT.chip);
+  ic.position.set(0.006, 0.0014, -0.003);
+  // photorésistance montée sur ses pattes, à l'avant
+  const ldr = new THREE.Group();
+  const side = new THREE.MeshPhysicalMaterial({ color: '#c97a2a', roughness: 0.35, clearcoat: 1 });
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.0026, 0.0026, 0.0016, 40), side);
+  disc.rotation.z = Math.PI / 2;
+  ldr.add(disc);
+  ldr.position.set(-0.019, 0.003, 0);
+  for (const dz of [-0.0012, 0.0012]) {
+    g.add(cable([[-0.0185, 0.003, dz], [-0.017, 0.0016, dz], [-0.015, 0.0012, dz]], 0.00022, MAT.steel, 8));
+  }
+  for (let i = 0; i < 3; i++) {
+    const pin = new THREE.Mesh(new THREE.BoxGeometry(0.0068, 0.0007, 0.0007), MAT.gold);
+    pin.position.set(0.0185, 0.0002, -0.0025 + i * 0.0025);
+    g.add(pin);
+  }
+  const hdr = new THREE.Mesh(new THREE.BoxGeometry(0.0026, 0.0026, 0.008), MAT.plasticBlack);
+  hdr.position.set(0.0148, 0.0002, 0);
+  g.add(pot, screw, slot, ic, ldr, hdr);
+  return g;
+}
+
+/** Bouton poussoir tactile 12 mm (boîtier métallique, capuchon noir, 4 pattes). */
+export function createTactileButton() {
+  const g = new THREE.Group();
+  g.name = 'Bouton poussoir';
+  const base = new THREE.Mesh(new RoundedBoxGeometry(0.012, 0.0035, 0.012, 2, 0.0006), MAT.plasticBlack);
+  const plate = new THREE.Mesh(new THREE.BoxGeometry(0.0118, 0.0005, 0.0118), MAT.steel);
+  plate.position.y = 0.002;
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.0034, 0.0036, 0.004, 40), new THREE.MeshPhysicalMaterial({ color: '#17191d', roughness: 0.55, clearcoat: 0.2 }));
+  cap.position.y = 0.0042;
+  g.add(base, plate, cap);
+  for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.0008, 0.0055, 0.0003), MAT.steel);
+    leg.position.set(x * 0.0062, -0.003, z * 0.0045);
+    g.add(leg);
+  }
+  g.userData.cap = cap;
+  return g;
+}
+
+/** LED 5 mm traversante (dôme translucide, pattes longue / courte). */
+export function createLED5mm(color = '#ffffff') {
+  const g = new THREE.Group();
+  g.name = 'LED';
+  const mat = new THREE.MeshPhysicalMaterial({ color, emissive: color, emissiveIntensity: 0, roughness: 0.08, transmission: 0.6, thickness: 0.004, ior: 1.5, clearcoat: 1 });
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.0025, 0.0025, 0.0055, 40), mat);
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(0.0025, 40, 20, 0, Math.PI * 2, 0, Math.PI / 2), mat);
+  dome.position.y = 0.00275;
+  const flange = new THREE.Mesh(new THREE.CylinderGeometry(0.0029, 0.0029, 0.0008, 40), mat);
+  flange.position.y = -0.0028;
+  const die = new THREE.Mesh(new THREE.BoxGeometry(0.0008, 0.0008, 0.0008), MAT.steel);
+  die.position.y = 0.0008;
+  g.add(body, dome, flange, die);
+  for (const [x, len] of [[-0.00125, 0.016], [0.00125, 0.013]]) {
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.00025, 0.00025, len, 8), MAT.steel);
+    leg.position.set(x, -0.0032 - len / 2, 0);
+    g.add(leg);
+  }
+  g.userData.mat = mat;
+  return g;
+}
+
+/** Deux cellules Li-ion 18650 (gaine bleue), comme sur la photo du matériel. */
+export function createCells18650() {
+  const g = new THREE.Group();
+  g.name = 'Batterie';
+  const wrap = canvasTexture(512, 128, (c, w, h) => {
+    const grd = c.createLinearGradient(0, 0, 0, h);
+    grd.addColorStop(0, '#3f8cff');
+    grd.addColorStop(0.5, '#1f63d8');
+    grd.addColorStop(1, '#123f99');
+    c.fillStyle = grd;
+    c.fillRect(0, 0, w, h);
+    c.fillStyle = 'rgba(255,255,255,0.9)';
+    c.font = 'bold 30px sans-serif';
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText('Li-ion  18650', w * 0.42, h * 0.5);
+  });
+  const mat = new THREE.MeshPhysicalMaterial({ map: wrap, roughness: 0.28, clearcoat: 1, clearcoatRoughness: 0.06 });
+  [[-0.0095, 0], [0.0095, 0.004]].forEach(([z, dx]) => {
+    const cell = new THREE.Group();
+    const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.065, 64, 1, true), mat);
+    tube.rotation.z = Math.PI / 2;
+    cell.add(tube);
+    for (const sx of [-1, 1]) {
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.0088, 0.0088, 0.001, 48), MAT.steel);
+      cap.rotation.z = Math.PI / 2;
+      cap.position.x = sx * 0.0326;
+      cell.add(cap);
+    }
+    const nub = new THREE.Mesh(new THREE.CylinderGeometry(0.0034, 0.0034, 0.0016, 24), MAT.steel);
+    nub.rotation.z = Math.PI / 2;
+    nub.position.x = 0.0336;
+    cell.add(nub);
+    cell.position.set(dx, 0.009, z);
+    g.add(cell);
+  });
+  return g;
+}

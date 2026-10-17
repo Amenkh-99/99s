@@ -280,7 +280,8 @@ export function createGlasses({ withWires = true, lens: lensQuality = 'full' } =
     const pivot = new THREE.Group();
     pivot.position.set(sx * 0.071, 0.0125, -0.008);
     pivot.rotation.y = -sx * 0.12;
-    const arm = new THREE.Mesh(new RoundedBoxGeometry(0.0034, 0.0088, 0.128, 3, 0.0015), MAT.titanium);
+    // branches graphite comme la face (le titane clair renvoyait trop la lumière du studio)
+    const arm = new THREE.Mesh(new RoundedBoxGeometry(0.0034, 0.0088, 0.128, 3, 0.0015), MAT.frame);
     arm.position.z = -0.064;
     const bendPivot = new THREE.Group();
     bendPivot.position.z = -0.126;

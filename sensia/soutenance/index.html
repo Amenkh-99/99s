@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SENSIA Soutenance 3D</title>
+<meta name="description" content="Présentation interactive en 3D de SENSIA, lunettes intelligentes pour personnes malvoyantes — ISET Radès, L3 EI2, 2026/2027.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="css/deck.css">
+<script type="importmap">
+{ "imports": { "three": "../vendor/three/three.module.min.js", "three/addons/": "../vendor/three/addons/" } }
+</script>
+</head>
+<body>
+<!--BODY-->
+<!-- Icônes (sprite SVG) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-glasses" viewBox="0 0 24 24"><path d="M2.5 10h19M4 10l.8 5.2a2 2 0 0 0 2 1.8h2.4a2 2 0 0 0 2-1.6L11.5 12h1l.3 3.4a2 2 0 0 0 2 1.6h2.4a2 2 0 0 0 2-1.8L20 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-obstacle" viewBox="0 0 24 24"><rect x="11" y="9" width="10" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 9.5a5 5 0 0 1 0 5M5.5 7.5a8 8 0 0 1 0 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-color" viewBox="0 0 24 24"><circle cx="12" cy="13" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 6c0-2 1-3 2.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chip" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9 2.5v3M15 2.5v3M9 18.5v3M15 18.5v3M2.5 9h3M2.5 15h3M18.5 9h3M18.5 15h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 21a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-cane" viewBox="0 0 24 24"><path d="M9 3.5h3a2 2 0 0 1 2 2V21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 16.5v4.5" stroke="currentColor" stroke-width="3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4l9 16H3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v4.5M12 17.2v.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-zoom" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 15.5L20 20M10.5 7.5v6M7.5 10.5h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<div id="viewport">
+<div id="stage">
+
+  <!-- Scène 3D en fond (partagée par toutes les diapositives) -->
+  <div id="gl-layer">
+    <canvas id="gl" aria-label="Modèle 3D des lunettes SENSIA"></canvas>
+    <div id="labels"></div>
+  </div>
+  <div id="fallback" hidden>
+    <img src="assets/prototype.jpg" alt="Prototype SENSIA : lunettes équipées d'un capteur à ultrasons et de fils de connexion">
+    <p>L'affichage 3D n'est pas disponible sur cet appareil (WebGL). La photo du prototype le remplace.</p>
+  </div>
+
+  <header class="topbar">
+    <div class="brand"><svg class="brand-mark"><use href="#i-glasses"/></svg><span>SENSIA</span></div>
+    <nav class="chapters" id="chapters" aria-label="Parties de la présentation"></nav>
+    <div class="topbar-meta">ISET Radès · L3 EI2 · 2026/2027</div>
+  </header>
+
+  <main id="slides">
+
+    <!-- 01 · Page de garde -->
+    <section class="slide" data-sec="0" data-shot="cover" data-title="Page de garde">
+      <div class="cover">
+        <div class="cover-inst">
+          <img class="iset" src="assets/iset-rades.jpg" alt="Logo de l'ISET Radès">
+          <div class="inst-lines">
+            <span>République Tunisienne</span>
+            <span>Ministère de l'Enseignement Supérieur et de la Recherche Scientifique</span>
+            <span>Direction Générale des Études Technologiques</span>
+            <b>Institut Supérieur des Études Technologiques de Radès</b>
+          </div>
+        </div>
+        <p class="eyebrow" id="project-kind">Projet de fin d'études</p>
+        <h1 class="wordmark">SENSI<span class="a">A</span></h1>
+        <p class="tagline">Lunettes intelligentes pour personnes malvoyantes</p>
+        <dl class="cover-meta">
+          <div><dt>Réalisé par</dt><dd>Mohamed Mokhtar MANNAI<br>Rawen TABOUBI</dd></div>
+          <div><dt>Encadré par</dt><dd>Mounira AYADI</dd></div>
+          <div><dt>Département</dt><dd>Électrique</dd></div>
+          <div><dt>Spécialité</dt><dd>Électricité industrielle</dd></div>
+          <div><dt>Classe</dt><dd>L3 EI2</dd></div>
+          <div><dt>Année</dt><dd>2026/2027</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- 02 · Sommaire -->
+    <section class="slide" data-sec="0" data-shot="sommaire" data-title="Sommaire">
+      <div class="toc">
+        <h2 class="h2">Sommaire</h2>
+        <ol class="toc-list" id="toc"></ol>
+      </div>
+    </section>
+
+    <!-- 03 · Planificateur -->
+    <section class="slide" data-sec="1" data-shot="off" data-title="Planificateur">
+      <div class="wide">
+        <div class="slide-head">
+          <p class="eyebrow">01 · Planificateur</p>
+          <h2 class="h2">Planning du projet</h2>
+        </div>
+        <div class="gantt glass" id="gantt">
+          <div class="gantt-legend" aria-label="Légende">
+            <span><i class="lg-plan"></i>Prévu</span>
+            <span><i class="lg-real"></i>Réel</span>
+            <small>Survolez une barre pour le détail.</small>
+          </div>
+          <div class="gantt-tip" id="gantt-tip" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 · Problématique -->
+    <section class="slide" data-sec="2" data-shot="side" data-title="Problématique">
+      <div class="panel">
+        <p class="eyebrow">02 · Problématique</p>
+        <h2 class="h2">Se déplacer sans bien voir</h2>
+        <p class="lead">Les personnes malvoyantes peuvent rencontrer des difficultés dans leurs déplacements pour :</p>
+        <ol class="needs">
+          <li><svg><use href="#i-obstacle"/></svg><div><b>Détecter les obstacles</b><span>situés devant elles</span></div></li>
+          <li><svg><use href="#i-target"/></svg><div><b>Identifier la position</b><span>d'un obstacle</span></div></li>
+          <li><svg><use href="#i-color"/></svg><div><b>Reconnaître la couleur</b><span>d'un objet</span></div></li>
+        </ol>
+        <p class="question">Comment les aider à gagner en autonomie, avec un dispositif simple et peu coûteux&nbsp;?</p>
+      </div>
+    </section>
+
+    <!-- 05 · Propositions des solutions possibles -->
+    <section class="slide" data-sec="3" data-shot="dim" data-title="Propositions des solutions possibles">
+      <div class="wide">
+        <div class="slide-head">
+          <p class="eyebrow">03 · Propositions des solutions possibles</p>
+          <h2 class="h2">Trois solutions envisagées</h2>
+        </div>
+        <div class="solutions">
+          <article class="sol glass">
+            <span class="sol-n">Solution 1</span>
+            <div class="sol-img"><img src="assets/canne-blanche.jpg" alt="Canne blanche pliante"></div>
+            <h3>Canne blanche</h3>
+          </article>
+          <article class="sol glass">
+            <span class="sol-n">Solution 2</span>
+            <div class="sol-img"><img src="assets/chien-guide.jpg" alt="Chien guide en harnais accompagnant une personne"></div>
+            <h3>Chien guide</h3>
+          </article>
+          <article class="sol glass pick">
+            <span class="sol-n">Solution 3 · retenue</span>
+            <div class="sol-img"><img src="assets/prototype.jpg" alt="Prototype des lunettes SENSIA"></div>
+            <h3>SENSIA <small>Lunettes intelligentes</small></h3>
+          </article>
+        </div>
+        <div class="why glass">
+          <h3>Pourquoi avons-nous choisi cette solution&nbsp;?</h3>
+          <ul>
+            <li>Trois aides réunies : obstacles, couleurs, obscurité.</li>
+            <li>Des messages vocaux clairs dans l'écouteur.</li>
+            <li>Des composants accessibles, programmés avec Arduino IDE.</li>
+            <li>Un complément à la canne blanche et au chien guide, pas un remplacement.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 · Objectifs SMART -->
+    <section class="slide" data-sec="4" data-shot="dim" data-title="Objectifs SMART">
+      <div class="wide narrow">
+        <div class="slide-head">
+          <p class="eyebrow">04 · Présentation de SENSIA</p>
+          <h2 class="h2">Objectifs SMART</h2>
+        </div>
+        <ol class="smart">
+          <li style="--c:#3d8bff"><i>S</i><b>Spécifique</b><span>Détecter un obstacle, identifier une couleur et allumer les LED en cas d'obscurité.</span></li>
+          <li style="--c:#20c997"><i>M</i><b>Mesurable</b><span>Tester la détection, au moins 5 couleurs et la réaction à un seuil de luminosité.</span></li>
+          <li style="--c:#ffb340"><i>A</i><b>Atteignable</b><span>Utiliser des composants accessibles et programmer avec Arduino IDE.</span></li>
+          <li style="--c:#ff6b81"><i>R</i><b>Réaliste</b><span>Réaliser un prototype fonctionnel dans le cadre du mini-projet, évolutif pour le PFE.</span></li>
+          <li style="--c:#a78bfa"><i>T</i><b>Temporel</b><span>Concevoir, programmer et tester le prototype en 2 à 3 mois.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 07 · Principe de fonctionnement -->
+    <section class="slide" data-sec="4" data-shot="off" data-title="Principe de fonctionnement">
+      <div class="wide">
+        <div class="slide-head">
+          <p class="eyebrow">04 · Présentation de SENSIA</p>
+          <h2 class="h2">Comment SENSIA fonctionne-t-elle&nbsp;?</h2>
+        </div>
+        <div class="flow" id="flow">
+          <article class="stage-card glass" style="--c:#20c997" data-k="0">
+            <header><i>1</i><b>Capteurs</b><svg><use href="#i-obstacle"/></svg></header>
+            <ul>
+              <li>Capteur de distance (HC-SR04)</li>
+              <li>Capteur de couleur (TCS3200)</li>
+              <li>LDR (luminosité)</li>
+              <li>Bouton poussoir</li>
+            </ul>
+          </article>
+          <span class="flow-arrow"><i></i></span>
+          <article class="stage-card glass" style="--c:#8b7bf2" data-k="1">
+            <header><i>2</i><b>ESP32</b><svg><use href="#i-chip"/></svg></header>
+            <p>Traitement des données et prise de décision</p>
+          </article>
+          <span class="flow-arrow"><i></i></span>
+          <article class="stage-card glass" style="--c:#ffa94d" data-k="2">
+            <header><i>3</i><b>Sorties</b><svg><use href="#i-sound"/></svg></header>
+            <ul>
+              <li>Message vocal</li>
+              <li>LED (si obscurité)</li>
+            </ul>
+          </article>
+          <span class="flow-arrow"><i></i></span>
+          <article class="stage-card glass" style="--c:#3d8bff" data-k="3">
+            <header><i>4</i><b>Utilisateur</b><svg><use href="#i-user"/></svg></header>
+            <p>Reçoit l'information et agit en conséquence</p>
+          </article>
+        </div>
+        <div class="scenarios">
+          <button class="scn" data-path="0,1,2,3" aria-pressed="true"><svg><use href="#i-obstacle"/></svg>Obstacle → message vocal</button>
+          <button class="scn" data-path="0,1,2,3"><svg><use href="#i-color"/></svg>Bouton → couleur annoncée</button>
+          <button class="scn" data-path="0,1,2"><svg><use href="#i-moon"/></svg>Obscurité → LED allumées</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 08 · Vue 3D des lunettes -->
+    <section class="slide" data-sec="4" data-shot="viewer" data-title="Vue 3D des lunettes">
+      <div class="panel">
+        <p class="eyebrow">04 · Présentation de SENSIA</p>
+        <h2 class="h2">Vue 3D des lunettes</h2>
+        <div class="seg" role="group" aria-label="Vue du modèle">
+          <button id="v-assembled" aria-pressed="true">Assemblé</button>
+          <button id="v-exploded" aria-pressed="false">Éclaté</button>
+        </div>
+        <div class="toggles">
+          <label class="tg"><input type="checkbox" id="t-leds"><span>Allumer les LED</span></label>
+          <label class="tg"><input type="checkbox" id="t-sonar"><span>Ondes ultrasonores</span></label>
+          <label class="tg"><input type="checkbox" id="t-rotate" checked><span>Rotation automatique</span></label>
+          <label class="tg"><input type="checkbox" id="t-photo"><span>Comparer avec le prototype</span></label>
+        </div>
+        <ol class="parts" id="parts"></ol>
+        <p class="note">Modèle 3D illustratif, pas un montage validé. Glissez pour tourner, molette pour zoomer, cliquez une pièce pour la voir de près.</p>
+      </div>
+      <figure class="proto-photo glass" id="proto-photo" hidden>
+        <img src="assets/prototype.jpg" alt="Photo du prototype réel des lunettes SENSIA">
+        <figcaption>Prototype réel</figcaption>
+      </figure>
+    </section>
+
+    <!-- 09 · Étude du matériel -->
+    <section class="slide" data-sec="5" data-shot="component" data-title="Étude du matériel utilisé">
+      <div class="panel">
+        <p class="eyebrow">05 · Étude du matériel utilisé</p>
+        <h2 class="h2">Le matériel</h2>
+        <div class="kit" id="kit"></div>
+        <p class="note">Cliquez un composant pour l'afficher en 3D. Glissez pour le tourner.</p>
+      </div>
+      <aside class="part-card glass" id="part-card" aria-live="polite">
+        <p class="eyebrow" id="pc-group"></p>
+        <h3 id="pc-name"></h3>
+        <p id="pc-role"></p>
+        <ul id="pc-why"></ul>
+        <p class="pc-vs" id="pc-vs" hidden></p>
+      </aside>
+    </section>
+
+    <!-- 10 · Logiciels et outils -->
+    <section class="slide" data-sec="5" data-shot="dim" data-title="Logiciels et outils">
+      <div class="wide">
+        <div class="slide-head">
+          <p class="eyebrow">05 · Étude du matériel utilisé</p>
+          <h2 class="h2">Logiciels et outils</h2>
+        </div>
+        <div class="tools">
+          <article class="tool glass">
+            <div class="tool-logo"><img src="assets/arduino.png" alt="Logo Arduino"></div>
+            <h3>Arduino IDE</h3>
+            <p>Programmation de l'ESP32</p>
+            <button class="link" data-goto="12">Voir l'extrait de programme<svg><use href="#i-arrow"/></svg></button>
+          </article>
+          <article class="tool glass">
+            <div class="tool-logo"><img src="assets/fritzing.jpg" alt="Logo Fritzing"></div>
+            <h3>Fritzing</h3>
+            <p>Schéma de câblage</p>
+            <button class="link" data-goto="11">Voir le schéma de câblage<svg><use href="#i-arrow"/></svg></button>
+          </article>
+          <article class="tool glass">
+            <div class="tool-logo wide-logo"><img src="assets/bibliotheques.jpg" alt="Menu Croquis, Inclure une bibliothèque, dans Arduino IDE"></div>
+            <h3>Bibliothèques Arduino</h3>
+            <p>Capteurs / Audio</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11 · Schéma de câblage -->
+    <section class="slide" data-sec="5" data-shot="off" data-title="Schéma de câblage">
+      <div class="wide">
+        <div class="slide-head">
+          <p class="eyebrow">05 · Étude du matériel utilisé</p>
+          <h2 class="h2">Schéma de câblage <small>réalisé avec Fritzing</small></h2>
+        </div>
+        <div class="wiring">
+          <figure class="zoomer glass" id="zoomer" tabindex="0" aria-label="Schéma de câblage, cliquez pour zoomer">
+            <img src="assets/cablage.jpg" alt="Schéma de câblage Fritzing : ESP32 DevKit V1 relié au HC-SR04, au TCS3200, au bouton, aux LED, à la LDR, au DFPlayer Mini, au haut-parleur et à la batterie 5 V" draggable="false">
+            <figcaption><svg><use href="#i-zoom"/></svg><span id="zoom-hint">Cliquez pour zoomer</span></figcaption>
+          </figure>
+          <div class="pins glass">
+            <div class="pin-filter" id="pin-filter" role="group" aria-label="Filtrer par module"></div>
+            <div class="pin-scroll">
+              <table class="pin-table" id="pin-table">
+                <thead><tr><th scope="col">Module</th><th scope="col">Broche</th><th scope="col">ESP32 DevKit V1</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <p class="pin-note" id="pin-note"><svg><use href="#i-warn"/></svg>GPIO18 apparaît deux fois (TCS3200 S2 et DFPlayer TX) : à vérifier.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12 · Extrait de programmation -->
+    <section class="slide" data-sec="5" data-shot="off" data-title="Extrait de programmation">
+      <div class="wide">
+        <div class="slide-head">
+          <p class="eyebrow">05 · Étude du matériel utilisé</p>
+          <h2 class="h2">Extrait de programmation <small>Arduino IDE</small></h2>
+        </div>
+        <div class="code glass">
+          <div class="code-bar">
+            <span class="dots"><i></i><i></i><i></i></span>
+            <span class="file">sensia.ino</span>
+            <button class="copy" id="copy-code"><svg><use href="#i-copy"/></svg><span>Copier</span></button>
+          </div>
+          <pre class="code-body"><code id="code-view"></code></pre>
+        </div>
+        <p class="note code-note">Squelette indicatif écrit à partir du tableau de câblage, non testé sur le matériel. Remplacez-le par l'extrait réel de votre programme (bloc <code>#sensia-code</code> du fichier).</p>
+      </div>
+      <script type="text/plain" id="sensia-code">// SENSIA — structure du programme (ESP32 DevKit V1)
+#include <DFRobotDFPlayerMini.h>
+
+// Broches, d'après le tableau de câblage
+const int TRIG = 13, ECHO = 32;                 // HC-SR04
+const int S0 = 4, S1 = 5, S2 = 18, S3 = 19;     // TCS3200
+const int OUT_COULEUR = 21;
+const int BOUTON = 27;                          // INPUT_PULLUP
+const int LED_VERTE = 25, LED_ROUGE = 26;
+const int LDR_AO = 34;                          // module LDR (LM393)
+// DFPlayer Mini : RX <- GPIO17, TX -> GPIO18 (voir remarque sur S2)
+
+const float SEUIL_DISTANCE_CM = 0;  // à régler par essais
+const int   SEUIL_LUMIERE     = 0;  // à régler par essais
+
+DFRobotDFPlayerMini lecteur;
+
+float mesurerDistanceCm() {
+  digitalWrite(TRIG, LOW);  delayMicroseconds(2);
+  digitalWrite(TRIG, HIGH); delayMicroseconds(10);
+  digitalWrite(TRIG, LOW);
+  long duree = pulseIn(ECHO, HIGH, 30000);      // aller-retour (µs)
+  return duree * 0.0343 / 2;
+}
+
+// Mesure d'une composante : S2/S3 choisissent le filtre, OUT donne une fréquence
+long mesurerFiltre(bool s2, bool s3) {
+  digitalWrite(S2, s2); digitalWrite(S3, s3);
+  return pulseIn(OUT_COULEUR, LOW);             // période : plus courte = plus intense
+}
+
+int identifierCouleur() {
+  long rouge = mesurerFiltre(LOW, LOW);
+  long vert  = mesurerFiltre(HIGH, HIGH);
+  long bleu  = mesurerFiltre(LOW, HIGH);
+  // À compléter : comparer aux valeurs de calibrage
+  // et renvoyer le numéro du fichier audio de la couleur reconnue.
+  if (rouge < vert && rouge < bleu) return 2;   // ex. 0002.mp3 = « rouge »
+  if (bleu < rouge && bleu < vert)  return 3;   // ex. 0003.mp3 = « bleu »
+  return 4;                                     // ex. 0004.mp3 = « couleur inconnue »
+}
+
+void setup() {
+  pinMode(TRIG, OUTPUT);  pinMode(ECHO, INPUT);
+  pinMode(S0, OUTPUT); pinMode(S1, OUTPUT);
+  pinMode(S2, OUTPUT); pinMode(S3, OUTPUT); pinMode(OUT_COULEUR, INPUT);
+  digitalWrite(S0, HIGH); digitalWrite(S1, LOW); // échelle de fréquence 20 %
+  pinMode(BOUTON, INPUT_PULLUP);
+  pinMode(LED_VERTE, OUTPUT); pinMode(LED_ROUGE, OUTPUT);
+  Serial2.begin(9600, SERIAL_8N1, 18, 17);      // RX, TX de l'ESP32
+  lecteur.begin(Serial2);
+}
+
+void loop() {
+  if (mesurerDistanceCm() < SEUIL_DISTANCE_CM) lecteur.play(1);  // message « obstacle »
+
+  bool sombre = analogRead(LDR_AO) < SEUIL_LUMIERE;
+  digitalWrite(LED_VERTE, sombre);
+  digitalWrite(LED_ROUGE, sombre);
+
+  if (digitalRead(BOUTON) == LOW) {
+    int fichier = identifierCouleur();          // lecture S2/S3 + OUT
+    lecteur.play(fichier);                      // message « couleur »
+  }
+  delay(100);
+}</script>
+    </section>
+
+    <!-- 13 · Conclusion et perspectives -->
+    <section class="slide" data-sec="6" data-shot="conclusion" data-title="Conclusion et perspectives">
+      <div class="panel">
+        <p class="eyebrow">06 · Conclusion</p>
+        <h2 class="h2">Conclusion</h2>
+        <p class="lead">Notre projet SENSIA vise à faciliter le déplacement des personnes malvoyantes grâce à des lunettes intelligentes qui détectent les obstacles et donnent des alertes sonores.</p>
+        <p class="body">Ce projet nous a permis d'appliquer nos connaissances techniques pour proposer une solution utile dans la vie quotidienne.</p>
+        <h3 class="h3">Perspectives</h3>
+        <ul class="persp">
+          <li>Tester la reconnaissance d'au moins 5 couleurs et la réaction au seuil de luminosité.</li>
+          <li>Intégrer l'électronique dans la monture pour réduire les câbles.</li>
+          <li>Faire évoluer le prototype à partir des essais réalisés.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 14 · Merci -->
+    <section class="slide" data-sec="6" data-shot="finale" data-title="Questions">
+      <div class="finale">
+        <p class="thanks">Merci pour votre attention</p>
+        <p class="ask">Des questions ou suggestions&nbsp;?</p>
+        <p class="credits glass">Mohamed Mokhtar MANNAI · Rawen TABOUBI <span>Encadrante : Mounira AYADI · ISET Radès</span></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="navbar">
+    <div class="progress" aria-hidden="true"><div class="progress-fill" id="progress"></div></div>
+    <div class="nav-left">
+      <button class="nb" id="prev" aria-label="Diapositive précédente" title="Précédente (←)"><svg><use href="#i-prev"/></svg></button>
+      <button class="nb" id="next" aria-label="Diapositive suivante" title="Suivante (→)"><svg><use href="#i-next"/></svg></button>
+      <span class="counter"><b id="n-cur">01</b><span>/</span><span id="n-tot">14</span></span>
+      <span class="slide-name" id="slide-name">Page de garde</span>
+    </div>
+    <div class="nav-right">
+      <button class="nb labeled" id="overview-btn" aria-label="Vue d'ensemble des diapositives" title="Vue d'ensemble (O)"><svg><use href="#i-grid"/></svg><span>Diapositives</span></button>
+      <button class="nb" id="full" aria-label="Plein écran" title="Plein écran (F)"><svg><use href="#i-full"/></svg></button>
+    </div>
+  </footer>
+
+  <div class="overview" id="overview" hidden>
+    <div class="ov-inner">
+      <div class="ov-head"><h2>Toutes les diapositives</h2><button class="nb labeled" id="ov-close">Fermer<kbd>Échap</kbd></button></div>
+      <div class="ov-grid" id="ov-grid"></div>
+    </div>
+  </div>
+</div>
+<p class="rotate-hint">Tournez l'écran à l'horizontale pour agrandir la présentation.</p>
+</div>
+<script type="module" src="js/deck.js"></script>
+<!--/BODY-->
+</body>
+</html>

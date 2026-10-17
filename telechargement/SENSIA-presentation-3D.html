@@ -1057,7 +1057,7 @@ button:focus-visible, li:focus-visible, input:focus-visible { outline: 2px solid
 </div>
 <script type="module">
 /*
- * SENSIA — Lunettes intelligentes · présentation technique interactive en 3D
+ * SENSIA — Lunettes intelligentes · présentation des fonctions interactive en 3D
  * Fichier unique généré par tools/build.py à partir des sources de sensia/.
  * Three.js r170 chargé depuis jsDelivr (connexion Internet requise).
  */
@@ -1073,10 +1073,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 // ══════════════════════════════════════════════════════════════════════
 // js/util.js
 // ══════════════════════════════════════════════════════════════════════
-const __util = (() => {
+const __js_util = (() => {
   // Utilitaires : interpolations, textures procédurales (circuits imprimés,
   // métal brossé, sol de studio…) et bibliothèque de matériaux PBR.
   // Aucune image externe : tout est dessiné sur des canvas 2D.
+
 
   const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
   const lerp = (a, b, t) => a + (b - a) * t;
@@ -1331,16 +1332,17 @@ const __util = (() => {
   }
   return { clamp, lerp, smooth, easeInOut, easeOutExpo, windowed, rng, COLORS, canvasTexture, brushedTex, softDot, pcbTextures, pcbMaterials, MAT, wireMaterial, glowMaterial, cable, roundedPolygon, meshesOf };
 })();
-const { clamp, lerp, smooth, easeInOut, easeOutExpo, windowed, rng, COLORS, canvasTexture, brushedTex, softDot, pcbTextures, pcbMaterials, MAT, wireMaterial, glowMaterial, cable, roundedPolygon, meshesOf } = __util;
+const { clamp, lerp, smooth, easeInOut, easeOutExpo, windowed, rng, COLORS, canvasTexture, brushedTex, softDot, pcbTextures, pcbMaterials, MAT, wireMaterial, glowMaterial, cable, roundedPolygon, meshesOf } = __js_util;
 
 // ══════════════════════════════════════════════════════════════════════
 // js/models/effects.js
 // ══════════════════════════════════════════════════════════════════════
-const __models_effects = (() => {
+const __js_models_effects = (() => {
   // Effets visuels : faisceaux volumétriques, ondes ultrasonores sphériques,
   // ondes sonores, flux lumineux, faisceau étalonné du TCS3200, particules.
   // Tous sont pilotés par le temps de la timeline (déterministes) : on peut
   // rejouer ou sauter à une étape sans incohérence.
+
 
 
   // Bruit de valeur 3D partagé par plusieurs shaders (scintillement, poussière lumineuse).
@@ -1784,18 +1786,19 @@ const __models_effects = (() => {
   }
   return { beamMaterial, makeBeam, lightPool, SonarPulses, detectionCone, SoundRings, flowMaterial, FlowLine, scanRing, SpectrumStreams, groundRing, outlineShell, dustField };
 })();
-const { beamMaterial, makeBeam, lightPool, SonarPulses, detectionCone, SoundRings, flowMaterial, FlowLine, scanRing, SpectrumStreams, groundRing, outlineShell, dustField } = __models_effects;
+const { beamMaterial, makeBeam, lightPool, SonarPulses, detectionCone, SoundRings, flowMaterial, FlowLine, scanRing, SpectrumStreams, groundRing, outlineShell, dustField } = __js_models_effects;
 
 // ══════════════════════════════════════════════════════════════════════
 // js/models/glasses.js
 // ══════════════════════════════════════════════════════════════════════
-const __models_glasses = (() => {
+const __js_models_glasses = (() => {
   // Modèle 3D des lunettes SENSIA (unités : mètres). Modèle illustratif.
   // Repère local : x = côté gauche de la personne, y = haut, z = vers l'avant.
   // Les positions des modules sont conceptuelles, inspirées de la photo du
   // prototype : HC-SR04 au centre, LED aux deux extrémités de la monture.
   // Matériaux : titane graphite brossé, verres teintés à transmission
   // (réfraction + reflet irisé), circuits imprimés procéduraux.
+
 
 
 
@@ -2071,7 +2074,8 @@ const __models_glasses = (() => {
       const pivot = new THREE.Group();
       pivot.position.set(sx * 0.071, 0.0125, -0.008);
       pivot.rotation.y = -sx * 0.12;
-      const arm = new THREE.Mesh(new RoundedBoxGeometry(0.0034, 0.0088, 0.128, 3, 0.0015), MAT.titanium);
+      // branches graphite comme la face (le titane clair renvoyait trop la lumière du studio)
+      const arm = new THREE.Mesh(new RoundedBoxGeometry(0.0034, 0.0088, 0.128, 3, 0.0015), MAT.frame);
       arm.position.z = -0.064;
       const bendPivot = new THREE.Group();
       bendPivot.position.z = -0.126;
@@ -2185,14 +2189,15 @@ const __models_glasses = (() => {
   }
   return { createHCSR04, createTCS3200, createLDR, createLED, createButton, createGlasses };
 })();
-const { createHCSR04, createTCS3200, createLDR, createLED, createButton, createGlasses } = __models_glasses;
+const { createHCSR04, createTCS3200, createLDR, createLED, createButton, createGlasses } = __js_models_glasses;
 
 // ══════════════════════════════════════════════════════════════════════
 // js/models/modules.js
 // ══════════════════════════════════════════════════════════════════════
-const __models_modules = (() => {
+const __js_models_modules = (() => {
   // Modules électroniques du système (formes simplifiées, échelle indicative).
   // Circuits imprimés procéduraux, blindage métallique gravé, connecteurs dorés.
+
 
 
 
@@ -2431,16 +2436,188 @@ const __models_modules = (() => {
     g.add(shell, strip, logo);
     return g;
   }
-  return { createESP32, createDFPlayer, createSDCard, createBattery, createEarphones, createBeltBox };
+
+  // ─── Composants supplémentaires (diapositive « Étude du matériel ») ─────────
+
+  /** Résistance traversante : corps beige, anneaux de couleur, pattes en acier. */
+  function createResistor(bands = ['#d42a2a', '#d42a2a', '#7a4a1e', '#d8b25a']) {
+    const g = new THREE.Group();
+    g.name = 'Résistance';
+    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.0012, 0.0045, 8, 24), new THREE.MeshPhysicalMaterial({ color: '#e3c9a0', roughness: 0.4, clearcoat: 0.6 }));
+    body.rotation.z = Math.PI / 2;
+    g.add(body);
+    bands.forEach((c, i) => {
+      const b = new THREE.Mesh(new THREE.CylinderGeometry(0.00125, 0.00125, 0.0005, 24), new THREE.MeshPhysicalMaterial({ color: c, roughness: 0.35, clearcoat: 0.6 }));
+      b.rotation.z = Math.PI / 2;
+      b.position.x = -0.0018 + i * 0.0011 + (i === 3 ? 0.0006 : 0);
+      g.add(b);
+    });
+    for (const sx of [-1, 1]) {
+      const leg = cable([[sx * 0.0032, 0, 0], [sx * 0.006, 0, 0], [sx * 0.0068, -0.0012, 0], [sx * 0.0068, -0.009, 0]], 0.00022, MAT.steel, 16);
+      g.add(leg);
+    }
+    return g;
+  }
+
+  /** Faisceau de fils de prototypage (jumpers) avec connecteurs Dupont. */
+  function createJumperWires() {
+    const g = new THREE.Group();
+    g.name = 'Fils électriques';
+    const cols = ['#e8871e', '#1aa58a', '#d42a2a', '#3d7bff', '#e3c21b', '#15171b'];
+    cols.forEach((c, i) => {
+      const a = (i / cols.length) * Math.PI * 2;
+      const r = 0.012 + (i % 2) * 0.004;
+      const pts = [];
+      for (let k = 0; k <= 8; k++) {
+        const t = k / 8;
+        pts.push([Math.cos(a + t * 2.6) * r * (0.6 + t * 0.5), Math.sin(t * Math.PI) * 0.006 + i * 0.0007, Math.sin(a + t * 2.6) * r * (0.6 + t * 0.5)]);
+      }
+      g.add(cable(pts, 0.00045, wireMaterial(c), 64));
+      for (const end of [pts[0], pts[pts.length - 1]]) {
+        const plug = new THREE.Mesh(new RoundedBoxGeometry(0.0026, 0.0026, 0.007, 2, 0.0004), MAT.plasticBlack);
+        plug.position.set(...end);
+        plug.lookAt(0, end[1], 0);
+        const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.00025, 0.00025, 0.004, 8), MAT.gold);
+        pin.rotation.x = Math.PI / 2;
+        pin.position.z = 0.005;
+        plug.add(pin);
+        g.add(plug);
+      }
+    });
+    return g;
+  }
+
+  /** Module LDR (carte bleue, photorésistance, potentiomètre de réglage, comparateur). */
+  function createLDRModule() {
+    const g = new THREE.Group();
+    g.name = 'Module LDR';
+    const tex = pcbTextures({
+      w: 512, h: 220, seed: 71, mask: '#1f55c9', maskDark: '#163f9c', copper: 'rgba(120,170,255,0.35)',
+      pads: [[0.9, 0.3, 7], [0.9, 0.5, 7], [0.9, 0.7, 7]],
+      text: [['VCC GND DO AO', 0.62, 0.86, 15], ['LM393', 0.55, 0.25, 15]],
+    });
+    const pcb = new THREE.Mesh(new THREE.BoxGeometry(0.032, 0.0016, 0.014), pcbMaterials(tex, '#123a8e', 2));
+    g.add(pcb);
+    // potentiomètre bleu avec vis
+    const pot = new THREE.Mesh(new RoundedBoxGeometry(0.0065, 0.004, 0.0065, 2, 0.0008), new THREE.MeshPhysicalMaterial({ color: '#2f6fe0', roughness: 0.35, clearcoat: 0.6 }));
+    pot.position.set(-0.002, 0.0028, 0);
+    const screw = new THREE.Mesh(new THREE.CylinderGeometry(0.0016, 0.0016, 0.0008, 24), MAT.steel);
+    screw.position.set(-0.002, 0.0049, 0);
+    const slot = new THREE.Mesh(new THREE.BoxGeometry(0.0026, 0.0003, 0.0004), MAT.chip);
+    slot.position.set(-0.002, 0.0054, 0);
+    const ic = new THREE.Mesh(new RoundedBoxGeometry(0.005, 0.0012, 0.004, 2, 0.0002), MAT.chip);
+    ic.position.set(0.006, 0.0014, -0.003);
+    // photorésistance montée sur ses pattes, à l'avant
+    const ldr = new THREE.Group();
+    const side = new THREE.MeshPhysicalMaterial({ color: '#c97a2a', roughness: 0.35, clearcoat: 1 });
+    const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.0026, 0.0026, 0.0016, 40), side);
+    disc.rotation.z = Math.PI / 2;
+    ldr.add(disc);
+    ldr.position.set(-0.019, 0.003, 0);
+    for (const dz of [-0.0012, 0.0012]) {
+      g.add(cable([[-0.0185, 0.003, dz], [-0.017, 0.0016, dz], [-0.015, 0.0012, dz]], 0.00022, MAT.steel, 8));
+    }
+    for (let i = 0; i < 3; i++) {
+      const pin = new THREE.Mesh(new THREE.BoxGeometry(0.0068, 0.0007, 0.0007), MAT.gold);
+      pin.position.set(0.0185, 0.0002, -0.0025 + i * 0.0025);
+      g.add(pin);
+    }
+    const hdr = new THREE.Mesh(new THREE.BoxGeometry(0.0026, 0.0026, 0.008), MAT.plasticBlack);
+    hdr.position.set(0.0148, 0.0002, 0);
+    g.add(pot, screw, slot, ic, ldr, hdr);
+    return g;
+  }
+
+  /** Bouton poussoir tactile 12 mm (boîtier métallique, capuchon noir, 4 pattes). */
+  function createTactileButton() {
+    const g = new THREE.Group();
+    g.name = 'Bouton poussoir';
+    const base = new THREE.Mesh(new RoundedBoxGeometry(0.012, 0.0035, 0.012, 2, 0.0006), MAT.plasticBlack);
+    const plate = new THREE.Mesh(new THREE.BoxGeometry(0.0118, 0.0005, 0.0118), MAT.steel);
+    plate.position.y = 0.002;
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.0034, 0.0036, 0.004, 40), new THREE.MeshPhysicalMaterial({ color: '#17191d', roughness: 0.55, clearcoat: 0.2 }));
+    cap.position.y = 0.0042;
+    g.add(base, plate, cap);
+    for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.0008, 0.0055, 0.0003), MAT.steel);
+      leg.position.set(x * 0.0062, -0.003, z * 0.0045);
+      g.add(leg);
+    }
+    g.userData.cap = cap;
+    return g;
+  }
+
+  /** LED 5 mm traversante (dôme translucide, pattes longue / courte). */
+  function createLED5mm(color = '#ffffff') {
+    const g = new THREE.Group();
+    g.name = 'LED';
+    const mat = new THREE.MeshPhysicalMaterial({ color, emissive: color, emissiveIntensity: 0, roughness: 0.08, transmission: 0.6, thickness: 0.004, ior: 1.5, clearcoat: 1 });
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.0025, 0.0025, 0.0055, 40), mat);
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(0.0025, 40, 20, 0, Math.PI * 2, 0, Math.PI / 2), mat);
+    dome.position.y = 0.00275;
+    const flange = new THREE.Mesh(new THREE.CylinderGeometry(0.0029, 0.0029, 0.0008, 40), mat);
+    flange.position.y = -0.0028;
+    const die = new THREE.Mesh(new THREE.BoxGeometry(0.0008, 0.0008, 0.0008), MAT.steel);
+    die.position.y = 0.0008;
+    g.add(body, dome, flange, die);
+    for (const [x, len] of [[-0.00125, 0.016], [0.00125, 0.013]]) {
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.00025, 0.00025, len, 8), MAT.steel);
+      leg.position.set(x, -0.0032 - len / 2, 0);
+      g.add(leg);
+    }
+    g.userData.mat = mat;
+    return g;
+  }
+
+  /** Deux cellules Li-ion 18650 (gaine bleue), comme sur la photo du matériel. */
+  function createCells18650() {
+    const g = new THREE.Group();
+    g.name = 'Batterie';
+    const wrap = canvasTexture(512, 128, (c, w, h) => {
+      const grd = c.createLinearGradient(0, 0, 0, h);
+      grd.addColorStop(0, '#3f8cff');
+      grd.addColorStop(0.5, '#1f63d8');
+      grd.addColorStop(1, '#123f99');
+      c.fillStyle = grd;
+      c.fillRect(0, 0, w, h);
+      c.fillStyle = 'rgba(255,255,255,0.9)';
+      c.font = 'bold 30px sans-serif';
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+      c.fillText('Li-ion  18650', w * 0.42, h * 0.5);
+    });
+    const mat = new THREE.MeshPhysicalMaterial({ map: wrap, roughness: 0.28, clearcoat: 1, clearcoatRoughness: 0.06 });
+    [[-0.0095, 0], [0.0095, 0.004]].forEach(([z, dx]) => {
+      const cell = new THREE.Group();
+      const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.065, 64, 1, true), mat);
+      tube.rotation.z = Math.PI / 2;
+      cell.add(tube);
+      for (const sx of [-1, 1]) {
+        const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.0088, 0.0088, 0.001, 48), MAT.steel);
+        cap.rotation.z = Math.PI / 2;
+        cap.position.x = sx * 0.0326;
+        cell.add(cap);
+      }
+      const nub = new THREE.Mesh(new THREE.CylinderGeometry(0.0034, 0.0034, 0.0016, 24), MAT.steel);
+      nub.rotation.z = Math.PI / 2;
+      nub.position.x = 0.0336;
+      cell.add(nub);
+      cell.position.set(dx, 0.009, z);
+      g.add(cell);
+    });
+    return g;
+  }
+  return { createESP32, createDFPlayer, createSDCard, createBattery, createEarphones, createBeltBox, createResistor, createJumperWires, createLDRModule, createTactileButton, createLED5mm, createCells18650 };
 })();
-const { createESP32, createDFPlayer, createSDCard, createBattery, createEarphones, createBeltBox } = __models_modules;
+const { createESP32, createDFPlayer, createSDCard, createBattery, createEarphones, createBeltBox, createResistor, createJumperWires, createLDRModule, createTactileButton, createLED5mm, createCells18650 } = __js_models_modules;
 
 // ══════════════════════════════════════════════════════════════════════
 // js/models/props.js
 // ══════════════════════════════════════════════════════════════════════
-const __models_props = (() => {
+const __js_models_props = (() => {
   // Décor : plateau de studio (sol satiné, éclairage trois points), obstacles
   // et objets colorés. Textures procédurales, aucun fichier externe.
+
 
 
 
@@ -2749,14 +2926,15 @@ const __models_props = (() => {
   }
   return { createStage, createCardboardBox, createChair, createPlant, createApple, createCube, createBench, createPillar };
 })();
-const { createStage, createCardboardBox, createChair, createPlant, createApple, createCube, createBench, createPillar } = __models_props;
+const { createStage, createCardboardBox, createChair, createPlant, createApple, createCube, createBench, createPillar } = __js_models_props;
 
 // ══════════════════════════════════════════════════════════════════════
 // js/models/person.js
 // ══════════════════════════════════════════════════════════════════════
-const __models_person = (() => {
+const __js_models_person = (() => {
   // Personnage stylisé (formes géométriques simples) portant SENSIA.
   // La personne regarde vers +z. Son côté gauche est +x, son côté droit −x.
+
 
 
 
@@ -3026,16 +3204,17 @@ const __models_person = (() => {
   }
   return { createPerson };
 })();
-const { createPerson } = __models_person;
+const { createPerson } = __js_models_person;
 
 // ══════════════════════════════════════════════════════════════════════
 // js/engine.js
 // ══════════════════════════════════════════════════════════════════════
-const __engine = (() => {
+const __js_engine = (() => {
   // Moteur 3D partagé : un seul renderer WebGL, un post-traitement
   // cinématographique (MSAA, bloom subtil, vignette, grain, aberration
   // chromatique légère), une carte d'environnement "studio" générée
   // localement, une qualité adaptative et des étiquettes HTML projetées.
+
 
 
 
@@ -3313,13 +3492,14 @@ const __engine = (() => {
   }
   return { webglAvailable, TIERS, Engine, LabelSet };
 })();
-const { webglAvailable, TIERS, Engine, LabelSet } = __engine;
+const { webglAvailable, TIERS, Engine, LabelSet } = __js_engine;
 
 // ══════════════════════════════════════════════════════════════════════
 // js/scenes/base.js
 // ══════════════════════════════════════════════════════════════════════
-const __scenes_base = (() => {
+const __js_scenes_base = (() => {
   // Classe de base d'une vue 3D (une scène + une caméra + des étiquettes).
+
 
 
   const _fwd = new THREE.Vector3();
@@ -3395,15 +3575,16 @@ const __scenes_base = (() => {
   }
   return { View, placeBubble };
 })();
-const { View, placeBubble } = __scenes_base;
+const { View, placeBubble } = __js_scenes_base;
 
 // ══════════════════════════════════════════════════════════════════════
 // js/scenes/intro.js
 // ══════════════════════════════════════════════════════════════════════
-const __scenes_intro = (() => {
+const __js_scenes_intro = (() => {
   // Diapositive 1 : une personne malvoyante porte SENSIA.
   // Plan large → gros plan sur les lunettes avec étiquettes → retour.
   // Un encart montre une perception floue de l'environnement (illustration).
+
 
 
 
@@ -3532,13 +3713,14 @@ const __scenes_intro = (() => {
   }
   return { IntroView };
 })();
-const { IntroView } = __scenes_intro;
+const { IntroView } = __js_scenes_intro;
 
 // ══════════════════════════════════════════════════════════════════════
 // js/scenes/hero.js
 // ══════════════════════════════════════════════════════════════════════
-const __scenes_hero = (() => {
+const __js_scenes_hero = (() => {
   // Vue "vitrine" : les lunettes SENSIA en lévitation (problématique, conclusion).
+
 
 
 
@@ -3621,13 +3803,14 @@ const __scenes_hero = (() => {
   }
   return { HeroView };
 })();
-const { HeroView } = __scenes_hero;
+const { HeroView } = __js_scenes_hero;
 
 // ══════════════════════════════════════════════════════════════════════
 // js/scenes/exploded.js
 // ══════════════════════════════════════════════════════════════════════
-const __scenes_exploded = (() => {
+const __js_scenes_exploded = (() => {
   // Diapositive 3 : vue éclatée technique (modèle illustratif, positions conceptuelles).
+
 
 
 
@@ -3856,13 +4039,14 @@ const __scenes_exploded = (() => {
   }
   return { ExplodedView };
 })();
-const { ExplodedView } = __scenes_exploded;
+const { ExplodedView } = __js_scenes_exploded;
 
 // ══════════════════════════════════════════════════════════════════════
 // js/scenes/obstacle.js
 // ══════════════════════════════════════════════════════════════════════
-const __scenes_obstacle = (() => {
+const __js_scenes_obstacle = (() => {
   // Fonction 1 : détection d'obstacle (HC-SR04) et message vocal (DFPlayer Mini).
+
 
 
 
@@ -4040,13 +4224,14 @@ const __scenes_obstacle = (() => {
   }
   return { OBSTACLE_MESSAGE, ObstacleView };
 })();
-const { OBSTACLE_MESSAGE, ObstacleView } = __scenes_obstacle;
+const { OBSTACLE_MESSAGE, ObstacleView } = __js_scenes_obstacle;
 
 // ══════════════════════════════════════════════════════════════════════
 // js/scenes/darkness.js
 // ══════════════════════════════════════════════════════════════════════
-const __scenes_darkness = (() => {
+const __js_scenes_darkness = (() => {
   // Fonction 2 : la LDR détecte l'obscurité, l'ESP32 allume les deux LED.
+
 
 
 
@@ -4183,14 +4368,15 @@ const __scenes_darkness = (() => {
   }
   return { DarknessView };
 })();
-const { DarknessView } = __scenes_darkness;
+const { DarknessView } = __js_scenes_darkness;
 
 // ══════════════════════════════════════════════════════════════════════
 // js/scenes/color.js
 // ══════════════════════════════════════════════════════════════════════
-const __scenes_color = (() => {
+const __js_scenes_color = (() => {
   // Fonction 3 : identification de la couleur d'un objet à la demande
   // (bouton poussoir → TCS3200 → ESP32 → DFPlayer Mini → écouteurs).
+
 
 
 
@@ -4387,12 +4573,12 @@ const __scenes_color = (() => {
   }
   return { OBJECTS, ColorView };
 })();
-const { OBJECTS, ColorView } = __scenes_color;
+const { OBJECTS, ColorView } = __js_scenes_color;
 
 // ══════════════════════════════════════════════════════════════════════
 // js/ui/hud.js
 // ══════════════════════════════════════════════════════════════════════
-const __ui_hud = (() => {
+const __js_ui_hud = (() => {
   // Interfaces HTML superposées aux scènes 3D (chaînes de traitement, jauges).
   // Elles fonctionnent aussi sans WebGL (affichage de secours).
 
@@ -4476,12 +4662,12 @@ const __ui_hud = (() => {
   }
   return { ObstacleHud, DarknessHud, ColorHud };
 })();
-const { ObstacleHud, DarknessHud, ColorHud } = __ui_hud;
+const { ObstacleHud, DarknessHud, ColorHud } = __js_ui_hud;
 
 // ══════════════════════════════════════════════════════════════════════
 // js/ui/speech.js
 // ══════════════════════════════════════════════════════════════════════
-const __ui_speech = (() => {
+const __js_ui_speech = (() => {
   // Lecture vocale des messages via la synthèse vocale du navigateur
   // (gratuite, locale, sans clé d'API). Elle illustre le fichier audio
   // que le DFPlayer Mini lirait depuis la carte mémoire.
@@ -4526,12 +4712,12 @@ const __ui_speech = (() => {
   }
   return { Speech };
 })();
-const { Speech } = __ui_speech;
+const { Speech } = __js_ui_speech;
 
 // ══════════════════════════════════════════════════════════════════════
 // js/ui/synoptic.js
 // ══════════════════════════════════════════════════════════════════════
-const __ui_synoptic = (() => {
+const __js_ui_synoptic = (() => {
   // Diapositive 4 : schéma synoptique animé (SVG).
   // Les flux de données (cyan) et l'alimentation (ambre, pointillés) sont distingués.
   // Aucune broche GPIO, tension ou détail de câblage n'est représenté ici.
@@ -4596,13 +4782,14 @@ const __ui_synoptic = (() => {
   }
   return { Synoptic };
 })();
-const { Synoptic } = __ui_synoptic;
+const { Synoptic } = __js_ui_synoptic;
 
 // ══════════════════════════════════════════════════════════════════════
 // js/main.js (point d'entrée)
 // ══════════════════════════════════════════════════════════════════════
 // Point d'entrée : navigation entre diapositives, lecture/pause des
 // animations, mise à l'échelle 16:9, commandes clavier et souris.
+
 
 
 

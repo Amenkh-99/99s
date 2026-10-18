@@ -13,15 +13,15 @@ Le texte, les notes et les images ont été extraits de ce fichier, et chaque di
 | Élément | Diapositive | Où dans la présentation |
 |---|---|---|
 | Établissement, année universitaire 2026-2027, formation L3GEEI2, étudiants (Laabidi Emna, Ben Romdhane Yassine), encadrante (Madame Ayedi Mounira) | 1 | Scène 1 |
-| Cinq défauts : surcharge, perte de phase, surchauffe, vibration anormale, tension anormale | 6 | Scènes 2, 10 |
-| Conséquences : échauffement → dégradation → arrêt → panne ; question de la problématique | 6 | Scène 2 |
-| Objectif général, boucle Mesurer → Détecter → Décider → Protéger, sept fonctions attendues | 8 | Scènes 4, 8 |
-| Objectifs SMART (dont « Réaliser le projet en six semaines ») | 10 | Scène 4 |
-| Matériel : moteur triphasé, disjoncteur, contacteur, relais thermique, capteurs (courant, tension, température, vibration), PLC Siemens, voyants et bouton d'arrêt | 12 | Scènes 5 à 9, 11 |
-| Logiciels : TIA Portal (programmation du PLC), PLCSIM (simulation du programme), CADe_SIMU (simulation du circuit électrique), Microsoft PowerPoint (présentation) | 12 | Scène 12 |
-| Chaîne « Capteurs → PLC → TIA Portal / PLCSIM → Commande → Moteur » | 12 | Scène 12 |
-| Tableau comparatif : protection classique, relais électronique, protection intelligente | 14 | Scène 13 |
-| Planificateur : six tâches et leurs valeurs numériques | 4 | Scène 14 |
+| Cinq défauts : surcharge, perte de phase, surchauffe, vibration anormale, tension anormale | 6 | Scènes 3, 12 |
+| Conséquences : échauffement → dégradation → arrêt → panne ; question de la problématique | 6 | Scène 3 |
+| Objectif général, boucle Mesurer → Détecter → Décider → Protéger, sept fonctions attendues | 8 | Scènes 5, 10 |
+| Objectifs SMART (dont « Réaliser le projet en six semaines ») | 10 | Scène 5 |
+| Matériel : moteur triphasé, disjoncteur, contacteur, relais thermique, capteurs (courant, tension, température, vibration), PLC Siemens, voyants et bouton d'arrêt | 12 | Scènes 7 à 11, 13 |
+| Logiciels : TIA Portal (programmation du PLC), PLCSIM (simulation du programme), CADe_SIMU (simulation du circuit électrique), Microsoft PowerPoint (présentation) | 12 | Scène 14 |
+| Chaîne « Capteurs → PLC → TIA Portal / PLCSIM → Commande → Moteur » | 12 | Scène 14 |
+| Tableau comparatif : protection classique, relais électronique, protection intelligente | 14 | Scène 6 |
+| Planificateur : six tâches et leurs valeurs numériques | 4 | Scène 2 |
 
 ### Planning : six semaines et onze périodes
 
@@ -62,7 +62,7 @@ Les cellules vides du document source apparaissent sous la forme « — ».
 
 **Supprimé :** la note de la diapositive 2 évoquait un plan en « six étapes … jusqu'au dimensionnement des constituants ». Aucun dimensionnement ne figure dans le dossier, et la mention a été retirée.
 
-**Conservé :** Microsoft PowerPoint reste cité comme l'outil de la présentation d'origine (scène 12). Il est précisé que la présentation web sert à la soutenance et ne fait pas partie du système de protection.
+**Conservé :** Microsoft PowerPoint reste cité comme l'outil de la présentation d'origine (scène 14). Il est précisé que la présentation web sert à la soutenance et ne fait pas partie du système de protection.
 
 ---
 
@@ -71,27 +71,27 @@ Les cellules vides du document source apparaissent sous la forme « — ».
 Ces éléments sont marqués à l'écran par l'étiquette « Illustration » (bordure en tirets) ou « Principe général » (bordure en pointillés). Les informations issues du dossier portent l'étiquette « Dossier du projet » (bordure pleine).
 
 - **Modèle 3D du moteur.** Moteur asynchrone générique à carcasse ailetée, construit par programme. Ce n'est pas un modèle CAO du moteur du projet. La plaque signalétique est volontairement vide de caractéristiques.
-- **Champ tournant et glissement (scène 3).** Il s'agit d'un principe général. Les vitesses sont ralenties et l'écart entre champ et rotor est volontairement exagéré pour être lisible.
+- **Champ tournant et glissement (scène 4).** Il s'agit d'un principe général. Les vitesses sont ralenties et l'écart entre champ et rotor est volontairement exagéré pour être lisible.
 - **Armoire et disposition des appareils.** Disposition, formes et cheminement des câbles sont illustratifs. Les appareils n'ont ni marque, ni modèle, ni repérage de bornes.
-- **Capteurs.** Les quatre catégories viennent du dossier. Leurs types, modèles, emplacements et la nature des signaux sont illustratifs. Les jauges de la scène 7 sont qualitatives : elles n'affichent ni valeur ni seuil.
+- **Capteurs.** Les quatre catégories viennent du dossier. Leurs types, modèles, emplacements et la nature des signaux sont illustratifs. Les jauges de la scène 9 sont qualitatives : elles n'affichent ni valeur ni seuil.
 - **Couleurs.**
   - Le cyan (normal), l'ambre (avertissement) et le rouge (défaut) sont un code de présentation. Ils ne décrivent ni les voyants réels, ni les isolants, ni le câblage.
   - Les conducteurs L1, L2 et L3 ont une gaine de couleur neutre, et l'animation lumineuse ne représente pas une couleur d'isolant.
   - Chaque état coloré est doublé d'un texte ou d'un symbole.
 - **Alarme.** Elle est visualisée de façon abstraite (anneaux, pictogramme). Son type réel n'est pas documenté.
 - **Automate.** Le boîtier est générique et associé au libellé « Automate programmable Siemens ». Aucun modèle n'est indiqué.
-- **Schéma de principe (scène 11).**
+- **Schéma de principe (scène 13).**
   - Il porte la mention « Non validé pour câblage » et reste au niveau des blocs.
   - Les repères Q1, KM1, RT1 et M1 sont des identifiants conventionnels illustratifs, signalés comme tels dans la légende.
   - Il ne montre ni bornes, ni adresses d'E/S, ni calibres, ni câblage de la bobine.
   - La liaison « Commande → KM1 » est une relation conceptuelle (tirets), pas un circuit de bobine.
-- **Matrice défauts × capteurs (scène 10).** Le dossier liste les cinq défauts et les quatre catégories de capteurs, mais pas leurs correspondances. Les marques en tirets sont une proposition conceptuelle, présentée comme « non confirmée par le dossier — à vérifier » :
+- **Matrice défauts × capteurs (scène 12).** Le dossier liste les cinq défauts et les quatre catégories de capteurs, mais pas leurs correspondances. Les marques en tirets sont une proposition conceptuelle, présentée comme « non confirmée par le dossier — à vérifier » :
   - surcharge → courant ;
   - perte de phase → courant, tension ;
   - surchauffe → température ;
   - vibration anormale → vibration ;
   - tension anormale → tension.
-- **Scénario de perte de phase (scène 9).** C'est un scénario fonctionnel illustratif, pas une reproduction du programme PLC. Il suit cette séquence :
+- **Scénario de perte de phase (scène 11).** C'est un scénario fonctionnel illustratif, pas une reproduction du programme PLC. Il suit cette séquence :
   1. fonctionnement normal ;
   2. une phase indisponible ;
   3. condition anormale signalée ;
@@ -102,7 +102,7 @@ Ces éléments sont marqués à l'écran par l'étiquette « Illustration » (bo
   8. défaut signalé et alarme.
 
   La séquence s'arrête là, et aucune scène suivante ne remet le moteur sous tension. Le moteur continue de tourner sur deux phases jusqu'à l'action de la protection, ce qui correspond au comportement général d'un moteur déjà lancé.
-- **Mise sous tension (scène 6).** La fermeture du disjoncteur puis du contacteur est montrée pour suivre le trajet de l'énergie. La commande de démarrage n'est pas documentée, et la scène ne l'attribue à aucun organe.
+- **Mise sous tension (scène 8).** La fermeture du disjoncteur puis du contacteur est montrée pour suivre le trajet de l'énergie. La commande de démarrage n'est pas documentée, et la scène ne l'attribue à aucun organe.
 
 ---
 

@@ -109,7 +109,7 @@ try {
   check('État déterministe quel que soit le chemin', seqOk.length === 0, seqOk.slice(0, 6).join(', '));
 
   // ── scénario : le contacteur s'ouvre, le flux aval s'arrête, le moteur ralentit
-  await page.evaluate(() => window.__motrix.goto(8, 3));
+  await page.evaluate(() => window.__motrix.goto(10, 3));
   await frames(5);
   const before = await page.evaluate(() => window.__motrix.stats().speed);
   await page.keyboard.press('ArrowRight'); // étape 5 : ouverture du contacteur (animée)

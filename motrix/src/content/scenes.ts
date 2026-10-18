@@ -85,7 +85,7 @@ export const SCENES: Scene[] = [
     base: { ...RUNNING, bench: 0, flows: 0, lamp: 'off', plc: 'idle' },
     steps: [{ camera: 'hero' }, { camera: 'heroWide', world: { dim: 0.45 } }],
     notes:
-      "Bonjour. Nous vous présentons MOTRIX, un système de protection intelligente pour un moteur asynchrone triphasé, réalisé par Laabidi Emna et Ben Romdhane Yassine sous l'encadrement de Madame Ayedi Mounira. [Étape suivante] Le plan suit la chaîne de protection : le problème, le moteur, nos objectifs, le système, un scénario de défaut, la conception et le bilan.",
+      "Bonjour. Nous vous présentons MOTRIX, un système de protection intelligente pour un moteur asynchrone triphasé, réalisé par Laabidi Emna et Ben Romdhane Yassine sous l'encadrement de Madame Ayedi Mounira. [Étape suivante] Nous présentons d'abord le planning du projet, puis le problème, le moteur, nos objectifs et la comparaison des solutions, le système, un scénario de défaut, la conception et la conclusion.",
     overlay: `
       <div class="plate" data-until="0">
         <div class="plate__head">
@@ -107,17 +107,43 @@ export const SCENES: Scene[] = [
       <div class="panel" data-step="1">
         <h2 class="scene-title">Sommaire</h2>
         <ol class="toc">
-          <li><span>Problématique</span><em>2</em></li>
-          <li><span>Le moteur asynchrone triphasé</span><em>3</em></li>
-          <li><span>Objectifs</span><em>4</em></li>
-          <li><span>Le système : architecture, puissance, mesure, décision</span><em>5–8</em></li>
-          <li><span>Défauts : scénario de perte de phase, matrice</span><em>9–10</em></li>
-          <li><span>Conception : schéma de principe, logiciels</span><em>11–12</em></li>
-          <li><span>Bilan : comparaison, planning, conclusion</span><em>13–15</em></li>
+          <li><span>Planning</span><em>2</em></li>
+          <li><span>Problématique</span><em>3</em></li>
+          <li><span>Le moteur asynchrone triphasé</span><em>4</em></li>
+          <li><span>Objectifs et comparaison des solutions</span><em>5–6</em></li>
+          <li><span>Le système : architecture, puissance, mesure, décision</span><em>7–10</em></li>
+          <li><span>Défauts : scénario de perte de phase, matrice</span><em>11–12</em></li>
+          <li><span>Conception : schéma de principe, logiciels</span><em>13–14</em></li>
+          <li><span>Conclusion</span><em>15</em></li>
         </ol>
       </div>`,
   },
   // 2 ────────────────────────────────────────────────────────────────
+  {
+    id: 'planning',
+    title: 'Planning',
+    chapter: 'Introduction',
+    camera: 'backdrop',
+    base: { ...BACKDROP, dim: 0.92 },
+    steps: [{}, {}],
+    notes:
+      "Notre planificateur comprend six tâches, de la préparation du cahier des charges jusqu'à la soutenance. L'axe compte onze périodes, dont l'unité n'est pas précisée dans le document. [Étape suivante] Les trois premières tâches sont réalisées à cent pour cent ; l'avancement des autres n'y est pas renseigné. Notre objectif temporel SMART reste de six semaines.",
+    overlay: `
+      <div class="wide">
+        <div class="title-row">
+          <h2 class="scene-title">Planning</h2>
+          <p class="smart-note">Objectif temporel (SMART) : <strong>six semaines</strong></p>
+        </div>
+        ${ganttChart()}
+        <ul class="legend legend--row">
+          <li><span class="sw-bar sw-bar--plan"></span>Prévu</li>
+          <li data-step="1"><span class="sw-bar sw-bar--act"></span>Réel (100 % accompli)</li>
+          <li><span class="gt-na-key">—</span>Non renseigné dans le document</li>
+        </ul>
+        <p class="provs">${prov.src('Tâches et valeurs : planificateur du dossier')}</p>
+      </div>`,
+  },
+  // 3 ────────────────────────────────────────────────────────────────
   {
     id: 'problematique',
     title: 'Problématique',
@@ -149,7 +175,7 @@ export const SCENES: Scene[] = [
         <p>${problemQuestion}</p>
       </blockquote>`,
   },
-  // 3 ────────────────────────────────────────────────────────────────
+  // 4 ────────────────────────────────────────────────────────────────
   {
     id: 'moteur',
     title: 'Le moteur asynchrone triphasé',
@@ -192,7 +218,7 @@ export const SCENES: Scene[] = [
         <p class="provs">${prov.gen('Principe général — modèle 3D illustratif, pas le matériel du projet')}</p>
       </div>`,
   },
-  // 4 ────────────────────────────────────────────────────────────────
+  // 5 ────────────────────────────────────────────────────────────────
   {
     id: 'objectifs',
     title: 'Objectifs',
@@ -219,7 +245,24 @@ export const SCENES: Scene[] = [
         <p class="provs">${prov.src()}</p>
       </div>`,
   },
-  // 5 ────────────────────────────────────────────────────────────────
+  // 6 ────────────────────────────────────────────────────────────────
+  {
+    id: 'comparaison',
+    title: 'Comparaison des solutions',
+    chapter: 'Objectifs',
+    camera: 'backdrop',
+    base: { ...BACKDROP, dim: 0.9 },
+    steps: [{}, {}, {}],
+    notes:
+      "Trois solutions sont comparées. La protection classique, disjoncteur et relais thermique : simple, fiable et économique, mais avec peu de surveillance. [Étape suivante] Le relais électronique mesure le courant et détecte les défauts : plus précis, mais plus coûteux. [Étape suivante] La protection intelligente ajoute capteurs, automate et alarme : surveillance en temps réel et arrêt automatique, au prix d'une conception plus complexe et d'une programmation.",
+    overlay: `
+      <div class="wide">
+        <h2 class="scene-title">Comparaison des solutions</h2>
+        ${comparisonGrid()}
+        <p class="provs">${prov.src('Tableau comparatif : dossier du projet')}</p>
+      </div>`,
+  },
+  // 7 ────────────────────────────────────────────────────────────────
   {
     id: 'architecture',
     title: 'Architecture du système',
@@ -257,7 +300,7 @@ export const SCENES: Scene[] = [
         <p class="provs">${prov.src('Liste du matériel : dossier du projet')}</p>
       </div>`,
   },
-  // 6 ────────────────────────────────────────────────────────────────
+  // 8 ────────────────────────────────────────────────────────────────
   {
     id: 'puissance',
     title: 'Flux de puissance triphasé',
@@ -288,7 +331,7 @@ export const SCENES: Scene[] = [
         <p class="provs">${prov.ill('Animation : code de présentation, pas les couleurs réelles des conducteurs')}</p>
       </div>`,
   },
-  // 7 ────────────────────────────────────────────────────────────────
+  // 9 ────────────────────────────────────────────────────────────────
   {
     id: 'mesure',
     title: 'Chaîne de mesure',
@@ -322,7 +365,7 @@ export const SCENES: Scene[] = [
         <p class="provs">${prov.src('Grandeurs surveillées : dossier du projet')}</p>
       </div>`,
   },
-  // 8 ────────────────────────────────────────────────────────────────
+  // 10 ───────────────────────────────────────────────────────────────
   {
     id: 'decision',
     title: 'Séquence de protection',
@@ -354,7 +397,7 @@ export const SCENES: Scene[] = [
           .join('')}
       </ol>`,
   },
-  // 9 ────────────────────────────────────────────────────────────────
+  // 11 ───────────────────────────────────────────────────────────────
   {
     id: 'scenario',
     title: 'Scénario : perte de phase',
@@ -412,7 +455,7 @@ export const SCENES: Scene[] = [
         </table>
       </aside>`,
   },
-  // 10 ───────────────────────────────────────────────────────────────
+  // 12 ───────────────────────────────────────────────────────────────
   {
     id: 'matrice',
     title: 'Défauts et grandeurs surveillées',
@@ -438,7 +481,7 @@ export const SCENES: Scene[] = [
         </div>
       </div>`,
   },
-  // 11 ───────────────────────────────────────────────────────────────
+  // 13 ───────────────────────────────────────────────────────────────
   {
     id: 'schema',
     title: 'Schéma de principe',
@@ -458,7 +501,7 @@ export const SCENES: Scene[] = [
         <p class="provs">${prov.src('Constituants : dossier du projet')} ${prov.ill('Disposition, symboles et repères : illustratifs ; bornes, adresses d’E/S, calibres et câblage de la bobine non documentés')}</p>
       </div>`,
   },
-  // 12 ───────────────────────────────────────────────────────────────
+  // 14 ───────────────────────────────────────────────────────────────
   {
     id: 'logiciels',
     title: 'Logiciels et simulation',
@@ -478,48 +521,6 @@ export const SCENES: Scene[] = [
         </div>
         <p class="provs">${prov.src('Outils et rôles : dossier du projet')} ${prov.ill('Le dossier ne documente ni résultats de simulation ni essais')}</p>
         <p class="fine">Présentation d’origine réalisée avec Microsoft PowerPoint. Cette version web sert à la soutenance et ne fait pas partie du système de protection.</p>
-      </div>`,
-  },
-  // 13 ───────────────────────────────────────────────────────────────
-  {
-    id: 'comparaison',
-    title: 'Comparaison des solutions',
-    chapter: 'Bilan',
-    camera: 'backdrop',
-    base: { ...BACKDROP, dim: 0.9 },
-    steps: [{}, {}, {}],
-    notes:
-      "Trois solutions sont comparées. La protection classique, disjoncteur et relais thermique : simple, fiable et économique, mais avec peu de surveillance. [Étape suivante] Le relais électronique mesure le courant et détecte les défauts : plus précis, mais plus coûteux. [Étape suivante] La protection intelligente ajoute capteurs, automate et alarme : surveillance en temps réel et arrêt automatique, au prix d'une conception plus complexe et d'une programmation.",
-    overlay: `
-      <div class="wide">
-        <h2 class="scene-title">Comparaison des solutions</h2>
-        ${comparisonGrid()}
-        <p class="provs">${prov.src('Tableau comparatif : dossier du projet')}</p>
-      </div>`,
-  },
-  // 14 ───────────────────────────────────────────────────────────────
-  {
-    id: 'planning',
-    title: 'Planning',
-    chapter: 'Bilan',
-    camera: 'backdrop',
-    base: { ...BACKDROP, dim: 0.92 },
-    steps: [{}, {}],
-    notes:
-      "Notre planificateur comprend six tâches, de la préparation du cahier des charges jusqu'à la soutenance. L'axe compte onze périodes, dont l'unité n'est pas précisée dans le document. [Étape suivante] Les trois premières tâches sont réalisées à cent pour cent ; l'avancement des autres n'y est pas renseigné. Notre objectif temporel SMART reste de six semaines.",
-    overlay: `
-      <div class="wide">
-        <div class="title-row">
-          <h2 class="scene-title">Planning</h2>
-          <p class="smart-note">Objectif temporel (SMART) : <strong>six semaines</strong></p>
-        </div>
-        ${ganttChart()}
-        <ul class="legend legend--row">
-          <li><span class="sw-bar sw-bar--plan"></span>Prévu</li>
-          <li data-step="1"><span class="sw-bar sw-bar--act"></span>Réel (100 % accompli)</li>
-          <li><span class="gt-na-key">—</span>Non renseigné dans le document</li>
-        </ul>
-        <p class="provs">${prov.src('Tâches et valeurs : planificateur du dossier')}</p>
       </div>`,
   },
   // 15 ───────────────────────────────────────────────────────────────

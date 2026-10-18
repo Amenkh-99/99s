@@ -30,19 +30,19 @@ const FILE = fileURLToPath(new URL('../dist-single/MOTRIX-presentation.html', im
 /** Durée d'affichage (s) de chaque étape, scène par scène — environ 3 min 30 au total. */
 const HOLDS = [
   [6, 4.5], // 1 ouverture (balayage lumineux), sommaire
-  [4.5, 6, 4.5], // 2 problématique
-  [4.5, 5, 7], // 3 moteur : éclaté, écorché + champ tournant
-  [5.5, 5, 5.5], // 4 objectifs
-  [5.5, 4.5, 4.5], // 5 architecture (montée du banc)
-  [4.5, 5, 4.5], // 6 flux de puissance
-  [4, 4.5, 5], // 7 chaîne de mesure
-  [3.8, 3.8, 3.8, 4, 4], // 8 séquence de protection
-  [4.5, 5, 4.5, 4, 5.5, 4.5, 5.5, 6.5], // 9 scénario perte de phase
-  [4.5, 5.5], // 10 matrice
-  [5.5, 6.5], // 11 schéma de principe
-  [5, 5], // 12 logiciels
-  [4.5, 4.5, 5.5], // 13 comparaison
-  [5, 5.5], // 14 planning
+  [5, 5.5], // 2 planning
+  [4.5, 6, 4.5], // 3 problématique
+  [4.5, 5, 7], // 4 moteur : éclaté, écorché + champ tournant
+  [5.5, 5, 5.5], // 5 objectifs
+  [4.5, 4.5, 5.5], // 6 comparaison
+  [5.5, 4.5, 4.5], // 7 architecture (montée du banc)
+  [4.5, 5, 4.5], // 8 flux de puissance
+  [4, 4.5, 5], // 9 chaîne de mesure
+  [3.8, 3.8, 3.8, 4, 4], // 10 séquence de protection
+  [4.5, 5, 4.5, 4, 5.5, 4.5, 5.5, 6.5], // 11 scénario perte de phase
+  [4.5, 5.5], // 12 matrice
+  [5.5, 6.5], // 13 schéma de principe
+  [5, 5], // 14 logiciels
   [6, 6], // 15 conclusion
 ];
 

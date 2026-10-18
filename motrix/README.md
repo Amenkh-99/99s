@@ -88,19 +88,19 @@ Les mêmes fonctions sont accessibles avec la souris dans la barre du bas.
 ### Plan (environ 8 à 10 minutes)
 
 1. Ouverture et sommaire
-2. Problématique
-3. Le moteur asynchrone triphasé (vue éclatée, écorché, champ tournant)
-4. Objectifs (général, fonctions, SMART)
-5. Architecture du système
-6. Flux de puissance triphasé
-7. Chaîne de mesure
-8. Séquence de protection
-9. Scénario : perte de phase
-10. Défauts et grandeurs surveillées
-11. Schéma de principe (non validé pour câblage)
-12. Logiciels et simulation
-13. Comparaison des solutions
-14. Planning
+2. Planning
+3. Problématique
+4. Le moteur asynchrone triphasé (vue éclatée, écorché, champ tournant)
+5. Objectifs (général, fonctions, SMART)
+6. Comparaison des solutions
+7. Architecture du système
+8. Flux de puissance triphasé
+9. Chaîne de mesure
+10. Séquence de protection
+11. Scénario : perte de phase
+12. Défauts et grandeurs surveillées
+13. Schéma de principe (non validé pour câblage)
+14. Logiciels et simulation
 15. Conclusion
 
 ---
